@@ -22,3 +22,12 @@ The page has a 2026 / 2025 switch (also linkable as `?year=2025`).
 - 2026: `data/youtube-2026.csv` and `data/facebook-2026.csv`
 - 2025: `data/youtube-2025.csv` and `data/facebook-2025.csv`. Facebook deletes live videos after 30 days; the 2025 Facebook file comes from snapshots recorded before deletion (views, reach, 3-second live views, partial average play time).
   2025 YouTube figures are lifetime totals; the Farewell row combines the live stream with its same-day replacement upload.
+
+## Points in time
+
+The page has an End of Fiesta / +1 week / +1 month / To date switch so years can be compared at the same point after the event.
+
+- End of Fiesta = through the day after the last show; +1 week and +1 month count from there.
+- 2025: `youtube-2025-end.csv` (through Oct 13, 2025), `-week.csv` (Oct 19), `-month.csv` (Nov 12), rebuilt from YouTube Studio's daily figures. `youtube-2025.csv` is To date.
+- 2026: `youtube-2026-end.csv` / `facebook-2026-end.csv` (through Oct 12, 2026). Add `youtube-2026-week.csv` after Oct 18 and `youtube-2026-month.csv` after Nov 11, then set their `stats` paths in the `YEARS` map at the top of `index.html`. `youtube-2026.csv` / `facebook-2026.csv` are To date.
+- Unique viewers and external % are lifetime-only, so they're blank in the milestone files.

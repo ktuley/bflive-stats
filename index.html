@@ -26,14 +26,38 @@ html,body{margin:0;background:var(--color-bg);color:var(--color-fg);font-family:
 <script src="assets/d3.min.js"></script>
 <script>
 (function(){
+  // Milestone snapshots: end = 24 hours after the last show, week = +1 week, month = +1 month, now = to date.
+  // A snapshot with no file yet shows as "coming" on the switch.
   const YEARS = {
-    '2026': {stats:'data/youtube-2026.csv', fb:'data/facebook-2026.csv'},
-    '2025': {stats:'data/youtube-2025.csv', fb:'data/facebook-2025.csv'}
+    '2026': {logo:'assets/logo-2026.png', fbDefault:'data/facebook-2026.csv', snaps:{
+      end:  {stats:'data/youtube-2026-end.csv', fb:'data/facebook-2026-end.csv', label:'through Oct 12, 2026', prelim:true},
+      week: {stats:null, label:'through Oct 18, 2026', due:'Oct 19'},
+      month:{stats:null, label:'through Nov 11, 2026', due:'Nov 12'},
+      now:  {stats:'data/youtube-2026.csv', fb:'data/facebook-2026.csv', label:'lifetime through Oct 11, 2026'}}},
+    '2025': {logo:'assets/logo-2025.png', fbDefault:'data/facebook-2025.csv', snaps:{
+      end:  {stats:'data/youtube-2025-end.csv', label:'through Oct 13, 2025'},
+      week: {stats:'data/youtube-2025-week.csv', label:'through Oct 19, 2025'},
+      month:{stats:'data/youtube-2025-month.csv', label:'through Nov 12, 2025'},
+      now:  {stats:'data/youtube-2025.csv', label:'lifetime through Oct 11, 2026'}}}
   };
+  window.BF_YEARS = YEARS;
+  const SNAP_NAMES = {end:'End of Fiesta', week:'+1 week', month:'+1 month', now:'To date'};
+  window.BF_SNAP_NAMES = SNAP_NAMES;
   let DATA = {}; const calcs = {}, fns = [];
   let status = 'loading';
   const qYear = new URLSearchParams(location.search).get('year');
   window.BF_YEAR = YEARS[qYear] ? qYear : '2026';
+  const qView = new URLSearchParams(location.search).get('view');
+  window.BF_VIEW = SNAP_NAMES[qView] ? qView : 'end';
+  // every milestone file for both years, for the year-over-year table
+  window.BF_ALL = {status:'loading', data:{}};
+  const loadAll = () => {
+    const jobs = [];
+    Object.entries(YEARS).forEach(([y, c]) => Object.entries(c.snaps).forEach(([k, sn]) => {
+      if (sn.stats) jobs.push(d3.csv(sn.stats + '?v=' + Date.now()).then(r => { (BF_ALL.data[y] = BF_ALL.data[y] || {})[k] = r; }));
+    }));
+    Promise.all(jobs).then(() => { BF_ALL.status = 'ok'; run(); }).catch(e => { BF_ALL.status = 'error'; console.error(e); run(); });
+  };
   window.dash = {
     colors: ['#3b6ea8','#c46f2b','#1877F2','#5a9e6f','#8e6bb8','#c4a42b','#d0587e','#4aa3a8'],
     data(id){
@@ -47,25 +71,35 @@ html,body{margin:0;background:var(--color-bg);color:var(--color-fg);font-family:
     refresh(){}, params(){return {};}, setParams(){}, resetParams(){}, setLink(){}
   };
   const run = () => fns.forEach(f=>{ try{ f(); }catch(e){ console.error(e); } });
-  function load(year){
-    window.BF_YEAR = year; status = 'loading'; DATA = {};
+  function load(year, view){
+    if (!YEARS[year].snaps[view].stats) view = 'now';
+    window.BF_YEAR = year; window.BF_VIEW = view; status = 'loading'; DATA = {};
     document.documentElement.dataset.year = year;
+    document.documentElement.dataset.view = view;
     document.querySelectorAll('.yr-btn').forEach(b => b.setAttribute('aria-pressed', b.dataset.year === year ? 'true' : 'false'));
+    document.querySelectorAll('.snap-btn').forEach(b => {
+      const sn = YEARS[year].snaps[b.dataset.view];
+      b.setAttribute('aria-pressed', b.dataset.view === view ? 'true' : 'false');
+      b.disabled = !sn.stats;
+      b.title = sn.stats ? `YouTube ${sn.label}` : `Available ${sn.due}`;
+    });
     if (window.BF_applyYear) window.BF_applyYear(year);
     run();
-    const src = YEARS[year];
+    const sn = YEARS[year].snaps[view];
+    const src = {stats: sn.stats, fb: sn.fb || YEARS[year].fbDefault};
     Promise.all(Object.entries(src).map(([k,u]) => d3.csv(u + '?v=' + Date.now()).then(rows => { DATA[k]=rows; })))
       .then(()=>{ if (!DATA.fb) DATA.fb = []; status='ok'; run(); })
       .catch(e=>{ status='error'; console.error(e); run(); });
   }
-  window.BF_setYear = (year) => {
-    const u = new URL(location.href); u.searchParams.set('year', year); history.replaceState(null, '', u);
-    load(year);
-  };
+  const setUrl = () => { const u = new URL(location.href); u.searchParams.set('year', BF_YEAR); u.searchParams.set('view', BF_VIEW); history.replaceState(null, '', u); };
+  window.BF_setYear = (year) => { load(year, BF_VIEW); setUrl(); };
+  window.BF_setView = (view) => { load(BF_YEAR, view); setUrl(); };
   let t; window.addEventListener('resize',()=>{clearTimeout(t); t=setTimeout(run,150);});
   window.addEventListener('DOMContentLoaded',()=>{
     document.querySelectorAll('.yr-btn').forEach(b => b.addEventListener('click', () => window.BF_setYear(b.dataset.year)));
-    load(window.BF_YEAR);
+    document.querySelectorAll('.snap-btn').forEach(b => b.addEventListener('click', () => { if (!b.disabled) window.BF_setView(b.dataset.view); }));
+    load(window.BF_YEAR, window.BF_VIEW);
+    loadAll();
   });
 })();
 </script>
@@ -100,7 +134,19 @@ html,body{margin:0;background:var(--color-bg);color:var(--color-fg);font-family:
 .yr-switch{display:inline-flex;border:1px solid var(--color-border-line);border-radius:999px;overflow:hidden;margin-bottom:var(--cds-gap-sm)}
 .yr-btn{all:unset;cursor:pointer;padding:4px 14px;font-size:var(--cds-font-size-body);color:var(--color-fg-muted);font-family:var(--font-anthropic-sans)}
 .yr-btn[aria-pressed=true]{background:var(--color-fg);color:var(--color-bg)}
-.yr-btn:focus-visible{outline:2px solid #3b6ea8;outline-offset:-2px}
+.yr-btn:focus-visible,.snap-btn:focus-visible{outline:2px solid #3b6ea8;outline-offset:-2px}
+.snap-btn{all:unset;cursor:pointer;padding:4px 12px;font-size:var(--cds-font-size-caption);color:var(--color-fg-muted);font-family:var(--font-anthropic-sans)}
+.snap-btn[aria-pressed=true]{background:var(--color-fg);color:var(--color-bg)}
+.snap-btn:disabled{cursor:default;opacity:.45}
+.switches{display:flex;flex-wrap:wrap;gap:var(--cds-gap-sm);align-items:center}
+.switches .yr-switch{margin:0}
+.masthead{display:flex;gap:var(--cds-gap-lg);align-items:center}
+.masthead img{width:clamp(88px,18vw,150px);height:auto;flex:none}
+.masthead .txt{min-width:0}
+.bf .snap-note{font-size:var(--cds-font-size-caption);color:var(--color-fg-muted);margin:var(--cds-gap-sm) 0 0}
+.bf .up{color:var(--color-ok)} .bf .down{color:var(--color-bad)}
+.bf tr.cur td{font-weight:var(--cds-font-weight-medium)}
+@media (max-width:520px){.masthead{flex-direction:column;align-items:flex-start}}
 html[data-year="2025"] .y2026{display:none!important}
 html:not([data-year="2025"]) .y2025{display:none!important}
 .bf .fail{display:flex;align-items:center;justify-content:center;gap:6px;color:var(--color-fg-muted);font-size:var(--cds-font-size-caption);min-height:inherit}
@@ -108,13 +154,27 @@ html:not([data-year="2025"]) .y2025{display:none!important}
 </style>
 <div class="bf">
   <header id="top">
-    <div class="yr-switch" role="group" aria-label="Year">
-      <button class="yr-btn" data-year="2026" aria-pressed="true">2026</button>
-      <button class="yr-btn" data-year="2025" aria-pressed="false">2025</button>
+    <div class="masthead">
+      <img id="logo" src="assets/logo-2026.png" alt="Balloon Fiesta Live! 2026 — Celebrating 10 years" width="150" height="142">
+      <div class="txt">
+        <div class="switches">
+          <div class="yr-switch" role="group" aria-label="Year">
+            <button class="yr-btn" data-year="2026" aria-pressed="true">2026</button>
+            <button class="yr-btn" data-year="2025" aria-pressed="false">2025</button>
+          </div>
+          <div class="yr-switch" role="group" aria-label="Point in time">
+            <button class="snap-btn" data-view="end" aria-pressed="true">End of Fiesta</button>
+            <button class="snap-btn" data-view="week" aria-pressed="false">+1 week</button>
+            <button class="snap-btn" data-view="month" aria-pressed="false">+1 month</button>
+            <button class="snap-btn" data-view="now" aria-pressed="false">To date</button>
+          </div>
+        </div>
+        <h1 id="page-title" style="margin-top:var(--cds-gap-sm)">Balloon Fiesta Live! 2026 — YouTube &amp; Facebook</h1>
+      </div>
     </div>
-    <h1 id="page-title">Balloon Fiesta Live! 2026 — YouTube &amp; Facebook</h1>
     <p class="lede" id="takeaway" data-source="totals combined">—</p>
-    <p class="lede y2025" id="fb-missing">2025 YouTube figures are lifetime totals, a full year of replays included. Facebook removes live videos after 30 days; its 2025 numbers come from snapshots taken before they were deleted, so Facebook watch time, live peaks and engagement weren't captured and show as —.</p>
+    <p class="snap-note" id="snap-note"></p>
+    <p class="lede y2025" id="fb-missing">Facebook removes live videos after 30 days. Its 2025 numbers come from snapshots taken before they were deleted, so they're the same at every point in time, and Facebook watch time, live peaks and engagement weren't captured and show as —.</p>
     <p class="lede y2026" id="tv-note">The shows also aired on Balloon Fiesta TV (low-power channel 28, over the air) and Comcast Cable channel 27 (Community Access). Viewer numbers aren't available for those broadcasts, so they aren't included in these totals.</p>
   </header>
 
@@ -145,11 +205,22 @@ html:not([data-year="2025"]) .y2025{display:none!important}
   <section id="reach">
     <h2>Reach</h2>
     <p class="note y2026">How many times YouTube showed the thumbnails, how often that became a view, and roughly how many different people watched each show. Unique viewers are YouTube's rounded estimates, summed across shows (someone who watched several shows counts once per show); Sunday Oct 11 isn't processed by YouTube yet.</p>
-    <p class="note y2025">How many times YouTube showed the thumbnails and how often that became a view, lifetime to date. Unique viewers are from records kept in December 2025.</p>
+    <p class="note y2025">How many times YouTube showed the thumbnails and how often that became a view, at the point in time chosen above. Unique viewers are lifetime, from records kept in December 2025, so they appear under To date only.</p>
     <div class="tiles">
       <div class="card"><div class="lbl">Thumbnail impressions</div><div class="big dash-skeleton" data-source="totals" data-field="impressions" data-row="0">—</div></div>
       <div class="card"><div class="lbl">Impressions click-through rate</div><div class="big dash-skeleton" data-source="totals" data-field="ctr" data-row="0">—</div></div>
       <div class="card"><div class="lbl">Unique viewers (sum of 14 shows)</div><div class="big dash-skeleton" data-source="totals" data-field="unique_viewers" data-row="0">—</div></div>
+    </div>
+  </section>
+
+  <section class="card" id="yoy">
+    <h2>YouTube year over year, same point in time</h2>
+    <p class="note">The same 14 live shows plus the Awards Ceremony each year (2026's Friday bonus show is left out so the sets match). End of Fiesta is 24 hours after the last show; +1 week and +1 month count from there. 2026 milestones fill in as they arrive; until YouTube processes Oct 12, the 2026 End of Fiesta row is preliminary.</p>
+    <div class="scroll">
+      <table id="yoytbl">
+        <thead><tr><th>Point in time</th><th>2025 views</th><th>2026 views</th><th>Change</th><th>2025 watch hrs</th><th>2026 watch hrs</th><th>Change</th></tr></thead>
+        <tbody></tbody>
+      </table>
     </div>
   </section>
 
@@ -163,8 +234,8 @@ html:not([data-year="2025"]) .y2025{display:none!important}
 
   <section class="card" id="all-shows">
     <h2 id="all-head">All shows</h2>
-    <p class="note y2026">Views and watch time are lifetime through Oct 11 (YouTube analytics lags about a day). Click a column to sort. The recorded Awards Ceremony was posted Saturday afternoon and is a niche show, so its smaller numbers are expected. <span class="flag">▲</span> marks an "average % viewed" figure YouTube reports higher than average view duration ÷ length would give — likely a replay-trim or processing quirk on YouTube's side.</p>
-    <p class="note y2025">Views and watch time are lifetime totals as of Oct 11, 2026, a full year of replays. Thursday PM Oct 9 ran only 29 minutes. The Farewell row combines the live stream with the recorded replacement upload posted the same day after a technical error. Click a column to sort. <span class="flag">▲</span> marks an "average % viewed" figure YouTube reports higher than average view duration ÷ length would give.</p>
+    <p class="note y2026">Views and watch time are at the point in time chosen above (YouTube analytics lags about a day). Click a column to sort. The recorded Awards Ceremony was posted Saturday afternoon and is a niche show, so its smaller numbers are expected. <span class="flag">▲</span> marks an "average % viewed" figure YouTube reports higher than average view duration ÷ length would give — likely a replay-trim or processing quirk on YouTube's side.</p>
+    <p class="note y2025">Views and watch time are at the point in time chosen above; To date includes a full year of replays. Thursday PM Oct 9 ran only 29 minutes. The Farewell row combines the live stream with the recorded replacement upload posted the same day after a technical error. Click a column to sort. <span class="flag">▲</span> marks an "average % viewed" figure YouTube reports higher than average view duration ÷ length would give.</p>
     <div class="scroll">
       <table id="tbl" data-source="stats" data-row-key="id">
         <thead><tr>
@@ -191,7 +262,7 @@ html:not([data-year="2025"]) .y2025{display:none!important}
 
   <section id="facebook">
     <h1 class="sect">Facebook</h1>
-    <p class="note y2026">14 live shows on the Balloon Fiesta Page (the Friday bonus show was pulled and the Awards Ceremony wasn't uploaded). From Meta Business Suite, lifetime through Oct 12. Facebook counts a "view" whenever the video starts playing, even for a moment in the feed, so its views run much higher than YouTube's; watch time is the fairer comparison.</p>
+    <p class="note y2026">14 live shows on the Balloon Fiesta Page (the Friday bonus show was pulled and the Awards Ceremony wasn't uploaded). From Meta Business Suite, through Oct 12, 2026; that pull serves as both End of Fiesta and To date until the next refresh. Facebook counts a "view" whenever the video starts playing, even for a moment in the feed, so its views run much higher than YouTube's; watch time is the fairer comparison.</p>
     <p class="note y2025">14 live shows on the Balloon Fiesta Page, from snapshots taken before Facebook deleted the videos (30 days after airing). The Awards Ceremony wasn't posted to Facebook. Views and reach are the final recorded figures; 3-second views are from the live broadcasts. Watch time, live peaks and engagement weren't captured.</p>
     <div class="tiles">
       <div class="card"><div class="lbl">Avg peak live viewers / show (approx.)</div><div class="big dash-skeleton" data-source="fbtotals" data-field="avg_peak" data-row="0">—</div></div>
@@ -293,7 +364,35 @@ dash.calc('totals', {
 window.BF_applyYear = (y) => {
   document.getElementById('page-title').textContent = y === '2025' ? 'Balloon Fiesta Live! 2025 — YouTube & Facebook' : 'Balloon Fiesta Live! 2026 — YouTube & Facebook';
   document.title = `Balloon Fiesta Live! ${y} Stats`;
+  const logo = document.getElementById('logo');
+  logo.src = BF_YEARS[y].logo;
+  logo.alt = y === '2025' ? 'Balloon Fiesta Live! 2025' : 'Balloon Fiesta Live! 2026 — Celebrating 10 years';
+  const sn = BF_YEARS[y].snaps[BF_VIEW];
+  const fbTxt = y === '2025' ? 'Facebook figures are the final records kept before deletion and don\'t change with this switch.' : 'Facebook figures are from Meta Business Suite, through Oct 12, 2026.';
+  document.getElementById('snap-note').textContent = `Showing ${BF_SNAP_NAMES[BF_VIEW]}: YouTube views, watch time, likes and impressions ${sn.label}${sn.prelim ? ' (preliminary until YouTube finishes processing that day)' : ''}. Live audience and chat are from the broadcasts and don't change. ${fbTxt}`;
 };
+const yoyRow = (rows) => {
+  const r = rows.filter(q => q.id !== '10-02-am');
+  return {views: d3.sum(r, q => Number(q.views)), wh: d3.sum(r, q => Number(q.watch_hours))};
+};
+function drawYoY() {
+  const tb = document.querySelector('#yoytbl tbody'); tb.innerHTML = '';
+  if (BF_ALL.status !== 'ok') return;
+  const chg = (a, b) => (a == null || b == null) ? {t: '—'} : {t: (b >= a ? '+' : '') + d3.format('.1%')(b / a - 1), c: b >= a ? 'up' : 'down'};
+  ['end', 'week', 'month', 'now'].forEach(k => {
+    const a = BF_ALL.data['2025'] && BF_ALL.data['2025'][k] ? yoyRow(BF_ALL.data['2025'][k]) : null;
+    const b = BF_ALL.data['2026'] && BF_ALL.data['2026'][k] ? yoyRow(BF_ALL.data['2026'][k]) : null;
+    const tr = document.createElement('tr'); if (k === BF_VIEW) tr.className = 'cur';
+    const due = BF_YEARS['2026'].snaps[k].due;
+    const cv = chg(a && a.views, b && b.views), cw = chg(a && a.wh, b && b.wh);
+    const name = k === 'now' ? 'To date (2025 includes a year of replays)' : BF_SNAP_NAMES[k];
+    [[name], [a ? fmt(a.views) : '—'], [b ? fmt(b.views) : (due ? `due ${due}` : '—')], [cv.t, cv.c], [a ? fmt(Math.round(a.wh)) : '—'], [b ? fmt(Math.round(b.wh)) : (due ? `due ${due}` : '—')], [cw.t, cw.c]]
+      .forEach(([v, c]) => { const td = document.createElement('td'); td.textContent = v; if (c) td.className = c; tr.append(td); });
+    if (k === 'now') { tr.lastChild.textContent = '—'; tr.lastChild.className = ''; tr.children[3].textContent = '—'; tr.children[3].className = ''; }
+    tb.append(tr);
+  });
+}
+dash.onData(drawYoY);
 const fmtC = new Intl.NumberFormat('en', {notation: 'compact', maximumFractionDigits: 1});
 const fmt = d3.format(',');
 const nf = v => v == null ? '—' : fmt(v);
@@ -510,5 +609,5 @@ dash.onData(drawFB);
 </script>
 
 <p class="foot y2026">Source: YouTube Studio, Meta Business Suite and Facebook Live Producer. Data last updated October 12, 2026. Facebook peak live viewers are approximate.</p>
-<p class="foot y2025">Sources: YouTube Studio, collected October 12, 2026 (lifetime through Oct 11, 2026); YouTube unique viewers and all Facebook figures from records kept before Facebook deleted the 2025 videos. Live audience and chat figures are from the original broadcasts.</p>
+<p class="foot y2025">Sources: YouTube Studio, collected October 12, 2026 (End of Fiesta, +1 week and +1 month rebuilt from YouTube's daily figures; To date is lifetime through Oct 11, 2026); YouTube unique viewers and all Facebook figures from records kept before Facebook deleted the 2025 videos. Live audience and chat figures are from the original broadcasts.</p>
 </div></body></html>
