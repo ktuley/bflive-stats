@@ -26,9 +26,14 @@ html,body{margin:0;background:var(--color-bg);color:var(--color-fg);font-family:
 <script src="assets/d3.min.js"></script>
 <script>
 (function(){
-  const SOURCES = {stats:'data/youtube-2026.csv', fb:'data/facebook-2026.csv'};
-  const DATA = {}, calcs = {}, fns = [];
+  const YEARS = {
+    '2026': {stats:'data/youtube-2026.csv', fb:'data/facebook-2026.csv'},
+    '2025': {stats:'data/youtube-2025.csv'}
+  };
+  let DATA = {}; const calcs = {}, fns = [];
   let status = 'loading';
+  const qYear = new URLSearchParams(location.search).get('year');
+  window.BF_YEAR = YEARS[qYear] ? qYear : '2026';
   window.dash = {
     colors: ['#3b6ea8','#c46f2b','#1877F2','#5a9e6f','#8e6bb8','#c4a42b','#d0587e','#4aa3a8'],
     data(id){
@@ -42,12 +47,25 @@ html,body{margin:0;background:var(--color-bg);color:var(--color-fg);font-family:
     refresh(){}, params(){return {};}, setParams(){}, resetParams(){}, setLink(){}
   };
   const run = () => fns.forEach(f=>{ try{ f(); }catch(e){ console.error(e); } });
+  function load(year){
+    window.BF_YEAR = year; status = 'loading'; DATA = {};
+    document.documentElement.dataset.year = year;
+    document.querySelectorAll('.yr-btn').forEach(b => b.setAttribute('aria-pressed', b.dataset.year === year ? 'true' : 'false'));
+    if (window.BF_applyYear) window.BF_applyYear(year);
+    run();
+    const src = YEARS[year];
+    Promise.all(Object.entries(src).map(([k,u]) => d3.csv(u + '?v=' + Date.now()).then(rows => { DATA[k]=rows; })))
+      .then(()=>{ if (!DATA.fb) DATA.fb = []; status='ok'; run(); })
+      .catch(e=>{ status='error'; console.error(e); run(); });
+  }
+  window.BF_setYear = (year) => {
+    const u = new URL(location.href); u.searchParams.set('year', year); history.replaceState(null, '', u);
+    load(year);
+  };
   let t; window.addEventListener('resize',()=>{clearTimeout(t); t=setTimeout(run,150);});
   window.addEventListener('DOMContentLoaded',()=>{
-    run();
-    Promise.all(Object.entries(SOURCES).map(([k,u]) => d3.csv(u + '?v=' + Date.now()).then(rows => { DATA[k]=rows; })))
-      .then(()=>{ status='ok'; run(); })
-      .catch(e=>{ status='error'; console.error(e); run(); });
+    document.querySelectorAll('.yr-btn').forEach(b => b.addEventListener('click', () => window.BF_setYear(b.dataset.year)));
+    load(window.BF_YEAR);
   });
 })();
 </script>
@@ -79,17 +97,28 @@ html,body{margin:0;background:var(--color-bg);color:var(--color-fg);font-family:
 .bf .flag{color:var(--color-warn)}
 .bf [data-dash-source-state=refreshing]{opacity:.5;transition:opacity var(--cds-dur-slow)}
 .bf [data-dash-source-state=empty]{color:transparent}
+.yr-switch{display:inline-flex;border:1px solid var(--color-border-line);border-radius:999px;overflow:hidden;margin-bottom:var(--cds-gap-sm)}
+.yr-btn{all:unset;cursor:pointer;padding:4px 14px;font-size:var(--cds-font-size-body);color:var(--color-fg-muted);font-family:var(--font-anthropic-sans)}
+.yr-btn[aria-pressed=true]{background:var(--color-fg);color:var(--color-bg)}
+.yr-btn:focus-visible{outline:2px solid #3b6ea8;outline-offset:-2px}
+html[data-year="2025"] .y2026{display:none!important}
+html:not([data-year="2025"]) .y2025{display:none!important}
 .bf .fail{display:flex;align-items:center;justify-content:center;gap:6px;color:var(--color-fg-muted);font-size:var(--cds-font-size-caption);min-height:inherit}
 .bf .fail i{width:.375rem;height:.375rem;border-radius:50%;background:var(--color-bad)}
 </style>
 <div class="bf">
   <header id="top">
-    <h1>Balloon Fiesta Live! 2026 — YouTube &amp; Facebook</h1>
+    <div class="yr-switch" role="group" aria-label="Year">
+      <button class="yr-btn" data-year="2026" aria-pressed="true">2026</button>
+      <button class="yr-btn" data-year="2025" aria-pressed="false">2025</button>
+    </div>
+    <h1 id="page-title">Balloon Fiesta Live! 2026 — YouTube &amp; Facebook</h1>
     <p class="lede" id="takeaway" data-source="totals combined">—</p>
-    <p class="lede" id="tv-note">The shows also aired on Balloon Fiesta TV (low-power channel 28, over the air) and Comcast Cable channel 27 (Community Access). Viewer numbers aren't available for those broadcasts, so they aren't included in these totals.</p>
+    <p class="lede y2025" id="fb-missing">Facebook numbers for 2025 aren't available: Facebook removes live videos after 30 days, so only YouTube is shown for this year. YouTube figures are lifetime totals, a full year of replays included.</p>
+    <p class="lede y2026" id="tv-note">The shows also aired on Balloon Fiesta TV (low-power channel 28, over the air) and Comcast Cable channel 27 (Community Access). Viewer numbers aren't available for those broadcasts, so they aren't included in these totals.</p>
   </header>
 
-  <section id="combined">
+  <section id="combined" class="y2026">
     <h1 class="sect">YouTube + Facebook</h1>
     <p class="note">Totals across both platforms. Live audience compares the 14 sessions streamed on both: the Friday bonus show and the recorded Awards Ceremony were on YouTube only. Facebook counts a view as soon as a video starts playing, so watch time is the better measure of attention.</p>
     <div class="tiles">
@@ -102,7 +131,7 @@ html,body{margin:0;background:var(--color-bg);color:var(--color-fg);font-family:
     </div>
   </section>
 
-  <h1 class="sect">YouTube</h1>
+  <h1 class="sect" id="yt-head">YouTube</h1>
   <section class="tiles" id="kpis">
     <div class="card"><div class="lbl">Live shows · total views</div><div class="big dash-skeleton" data-source="totals" data-field="views" data-row="0">—</div></div>
     <div class="card"><div class="lbl">Watch time (hours)</div><div class="big dash-skeleton" data-source="totals" data-field="watch_hours" data-row="0">—</div></div>
@@ -114,7 +143,8 @@ html,body{margin:0;background:var(--color-bg);color:var(--color-fg);font-family:
 
   <section id="reach">
     <h2>Reach</h2>
-    <p class="note">How many times YouTube showed the thumbnails, how often that became a view, and roughly how many different people watched each show. Unique viewers are YouTube's rounded estimates, summed across shows (someone who watched several shows counts once per show); Sunday Oct 11 isn't processed by YouTube yet.</p>
+    <p class="note y2026">How many times YouTube showed the thumbnails, how often that became a view, and roughly how many different people watched each show. Unique viewers are YouTube's rounded estimates, summed across shows (someone who watched several shows counts once per show); Sunday Oct 11 isn't processed by YouTube yet.</p>
+    <p class="note y2025">How many times YouTube showed the thumbnails and how often that became a view, lifetime to date. Unique viewers weren't collected for 2025.</p>
     <div class="tiles">
       <div class="card"><div class="lbl">Thumbnail impressions</div><div class="big dash-skeleton" data-source="totals" data-field="impressions" data-row="0">—</div></div>
       <div class="card"><div class="lbl">Impressions click-through rate</div><div class="big dash-skeleton" data-source="totals" data-field="ctr" data-row="0">—</div></div>
@@ -131,8 +161,9 @@ html,body{margin:0;background:var(--color-bg);color:var(--color-fg);font-family:
   </section>
 
   <section class="card" id="all-shows">
-    <h2>All 16 shows</h2>
-    <p class="note">Views and watch time are lifetime through Oct 11 (YouTube analytics lags about a day). Click a column to sort. The recorded Awards Ceremony was posted Saturday afternoon and is a niche show, so its smaller numbers are expected. <span class="flag">▲</span> marks an "average % viewed" figure YouTube reports higher than average view duration ÷ length would give — likely a replay-trim or processing quirk on YouTube's side.</p>
+    <h2 id="all-head">All shows</h2>
+    <p class="note y2026">Views and watch time are lifetime through Oct 11 (YouTube analytics lags about a day). Click a column to sort. The recorded Awards Ceremony was posted Saturday afternoon and is a niche show, so its smaller numbers are expected. <span class="flag">▲</span> marks an "average % viewed" figure YouTube reports higher than average view duration ÷ length would give — likely a replay-trim or processing quirk on YouTube's side.</p>
+    <p class="note y2025">Views and watch time are lifetime totals as of Oct 11, 2026, a full year of replays. Thursday PM Oct 9 ran only 29 minutes. The Farewell row combines the live stream with the recorded replacement upload posted the same day after a technical error. Click a column to sort. <span class="flag">▲</span> marks an "average % viewed" figure YouTube reports higher than average view duration ÷ length would give.</p>
     <div class="scroll">
       <table id="tbl" data-source="stats" data-row-key="id">
         <thead><tr>
@@ -157,7 +188,7 @@ html,body{margin:0;background:var(--color-bg);color:var(--color-fg);font-family:
     </div>
   </section>
 
-  <section id="facebook">
+  <section id="facebook" class="y2026">
     <h1 class="sect">Facebook</h1>
     <p class="note">14 live shows on the Balloon Fiesta Page (the Friday bonus show was pulled and the Awards Ceremony wasn't uploaded). From Meta Business Suite, lifetime through Oct 12. Facebook counts a "view" whenever the video starts playing, even for a moment in the feed, so its views run much higher than YouTube's; watch time is the fairer comparison.</p>
     <div class="tiles">
@@ -171,7 +202,7 @@ html,body{margin:0;background:var(--color-bg);color:var(--color-fg);font-family:
     </div>
   </section>
 
-  <section class="card" id="platforms">
+  <section class="card y2026" id="platforms">
     <h2>YouTube vs Facebook — same 14 shows</h2>
     <p class="note">Excludes the Friday bonus show and the Awards Ceremony, which weren't on Facebook.</p>
     <div class="scroll">
@@ -188,7 +219,7 @@ html,body{margin:0;background:var(--color-bg);color:var(--color-fg);font-family:
     <div class="tip" id="tip2"></div>
   </section>
 
-  <section class="card" id="fb-shows">
+  <section class="card y2026" id="fb-shows">
     <h2>Facebook — all 14 shows</h2>
     <p class="note">Peak live viewers are read from each stream's Live Producer chart (Facebook doesn't publish a number), so they're approximate, within about 5%, rounded to the nearest 10. Viewers for Oct 7 AM and Oct 8 AM show as 0 in Facebook's data, so they're left blank here.</p>
     <div class="scroll">
@@ -254,6 +285,10 @@ dash.calc('totals', {
   }
 });
 
+window.BF_applyYear = (y) => {
+  document.getElementById('page-title').textContent = y === '2025' ? 'Balloon Fiesta Live! 2025 — YouTube' : 'Balloon Fiesta Live! 2026 — YouTube & Facebook';
+  document.title = `Balloon Fiesta Live! ${y} Stats`;
+};
 const fmtC = new Intl.NumberFormat('en', {notation: 'compact', maximumFractionDigits: 1});
 const fmt = d3.format(',');
 const dayFmt = d => d3.utcFormat('%a %b %-d')(new Date(d + 'T12:00:00Z'));
@@ -270,15 +305,20 @@ function draw() {
       el.classList.remove('dash-skeleton');
       const v = D.data[0][el.dataset.field];
       const f = el.dataset.field;
-      el.textContent = f === 'hours_streamed' ? d3.format('.1f')(v) : f === 'ctr' ? d3.format('.1%')(v) : (v >= 1e6 ? d3.format('.3s')(v).replace('G','B') : v >= 10000 ? fmtC.format(v) : fmt(v));
+      el.textContent = (f === 'unique_viewers' && !v) ? '—' : f === 'hours_streamed' ? d3.format('.1f')(v) : f === 'ctr' ? d3.format('.1%')(v) : (v >= 1e6 ? d3.format('.3s')(v).replace('G','B') : v >= 10000 ? fmtC.format(v) : fmt(v));
     } else { el.textContent = '—'; if (D.status === 'error') el.classList.remove('dash-skeleton'); }
   });
   const tk = document.getElementById('takeaway');
-  if (T.status === 'ok' && T.data.length && C.status === 'ok' && C.data.length) {
+  if (window.BF_YEAR === '2025' && T.status === 'ok' && T.data.length && S.status === 'ok') {
+    const t = T.data[0];
+    const allViews = S.data.reduce((a, r) => a + Number(r.views || 0), 0), allWh = Math.round(S.data.reduce((a, r) => a + Number(r.watch_hours || 0), 0));
+    tk.textContent = `${t.shows} live shows and the recorded Awards Ceremony have reached ${fmt(allViews)} views and ${fmt(allWh)} hours of watch time on YouTube, with up to ${fmt(t.max_peak)} people watching live at once.`;
+  } else if (T.status === 'ok' && T.data.length && C.status === 'ok' && C.data.length) {
     const t = T.data[0], c = C.data[0];
     tk.textContent = `${t.shows} live shows and the recorded Awards Ceremony reached ${fmt(c.views)} views and ${fmt(c.watch_hours)} hours of watch time across YouTube and Facebook, with up to ${fmt(c.max_peak)} people watching live at once.`;
   } else tk.textContent = '—';
 
+  if (S.status === 'ok') document.getElementById('all-head').textContent = `All ${S.data.length} shows`;
   const chart = document.getElementById('chart');
   const tbody = document.querySelector('#tbl tbody');
   document.getElementById('sw0').style.background = dash.colors[0];
@@ -340,7 +380,7 @@ function draw() {
     const c0 = document.createElement('td');
     const nm = document.createElement('div'); nm.textContent = r.show;
     const sb = document.createElement('div'); sb.className = 'sub';
-    sb.textContent = r.type === 'Recorded' ? 'Recorded · uploaded Oct 10' : `${dayFmt(r.date)} ${r.session}`;
+    sb.textContent = r.type === 'Recorded' ? `Recorded · uploaded ${d3.utcFormat('%b %-d')(new Date(r.date + 'T12:00:00Z'))}` : `${dayFmt(r.date)} ${r.session}`;
     c0.append(nm, sb); tr.append(c0);
     const n = k => r[k] === '' ? '—' : fmt(Number(r[k]));
     const pctFlag = Number(r.avg_pct_viewed) > (Number(r.avg_view_min) / Number(r.length_min) * 100) + 2;
@@ -460,5 +500,6 @@ document.querySelectorAll('#fbtbl th button').forEach(b => b.addEventListener('c
 dash.onData(drawFB);
 </script>
 
-<p class="foot">Source: YouTube Studio, Meta Business Suite and Facebook Live Producer. Data last updated <span id="updated">October 12, 2026</span>. Facebook peak live viewers are approximate.</p>
+<p class="foot y2026">Source: YouTube Studio, Meta Business Suite and Facebook Live Producer. Data last updated October 12, 2026. Facebook peak live viewers are approximate.</p>
+<p class="foot y2025">Source: YouTube Studio. 2025 data collected October 12, 2026 (lifetime through Oct 11, 2026). Live audience and chat figures are from the original broadcasts.</p>
 </div></body></html>
