@@ -20,5 +20,5 @@ Facebook peak live viewers are read from Live Producer charts and are approximat
 ## Years
 The page has a 2026 / 2025 switch (also linkable as `?year=2025`).
 - 2026: `data/youtube-2026.csv` and `data/facebook-2026.csv`
-- 2025: `data/youtube-2025.csv` only. Facebook deletes live videos after 30 days, so no 2025 Facebook data exists.
+- 2025: `data/youtube-2025.csv` and `data/facebook-2025.csv`. Facebook deletes live videos after 30 days; the 2025 Facebook file comes from snapshots recorded before deletion (views, reach, 3-second live views, partial average play time).
   2025 YouTube figures are lifetime totals; the Farewell row combines the live stream with its same-day replacement upload.

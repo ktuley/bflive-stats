@@ -28,7 +28,7 @@ html,body{margin:0;background:var(--color-bg);color:var(--color-fg);font-family:
 (function(){
   const YEARS = {
     '2026': {stats:'data/youtube-2026.csv', fb:'data/facebook-2026.csv'},
-    '2025': {stats:'data/youtube-2025.csv'}
+    '2025': {stats:'data/youtube-2025.csv', fb:'data/facebook-2025.csv'}
   };
   let DATA = {}; const calcs = {}, fns = [];
   let status = 'loading';
@@ -114,13 +114,14 @@ html:not([data-year="2025"]) .y2025{display:none!important}
     </div>
     <h1 id="page-title">Balloon Fiesta Live! 2026 — YouTube &amp; Facebook</h1>
     <p class="lede" id="takeaway" data-source="totals combined">—</p>
-    <p class="lede y2025" id="fb-missing">Facebook numbers for 2025 aren't available: Facebook removes live videos after 30 days, so only YouTube is shown for this year. YouTube figures are lifetime totals, a full year of replays included.</p>
+    <p class="lede y2025" id="fb-missing">2025 YouTube figures are lifetime totals, a full year of replays included. Facebook removes live videos after 30 days; its 2025 numbers come from snapshots taken before they were deleted, so Facebook watch time, live peaks and engagement weren't captured and show as —.</p>
     <p class="lede y2026" id="tv-note">The shows also aired on Balloon Fiesta TV (low-power channel 28, over the air) and Comcast Cable channel 27 (Community Access). Viewer numbers aren't available for those broadcasts, so they aren't included in these totals.</p>
   </header>
 
-  <section id="combined" class="y2026">
+  <section id="combined">
     <h1 class="sect">YouTube + Facebook</h1>
-    <p class="note">Totals across both platforms. Live audience compares the 14 sessions streamed on both: the Friday bonus show and the recorded Awards Ceremony were on YouTube only. Facebook counts a view as soon as a video starts playing, so watch time is the better measure of attention.</p>
+    <p class="note y2026">Totals across both platforms. Live audience compares the 14 sessions streamed on both: the Friday bonus show and the recorded Awards Ceremony were on YouTube only. Facebook counts a view as soon as a video starts playing, so watch time is the better measure of attention.</p>
+    <p class="note y2025">Totals across both platforms. Facebook counts a view as soon as a video starts playing. Watch time, live audience and engagement need Facebook figures that weren't captured in 2025, so those show as —; the YouTube section below has them.</p>
     <div class="tiles">
       <div class="card"><div class="lbl">Total views</div><div class="big dash-skeleton" data-source="combined" data-field="views" data-row="0">—</div></div>
       <div class="card"><div class="lbl">Total watch time (hours)</div><div class="big dash-skeleton" data-source="combined" data-field="watch_hours" data-row="0">—</div></div>
@@ -144,7 +145,7 @@ html:not([data-year="2025"]) .y2025{display:none!important}
   <section id="reach">
     <h2>Reach</h2>
     <p class="note y2026">How many times YouTube showed the thumbnails, how often that became a view, and roughly how many different people watched each show. Unique viewers are YouTube's rounded estimates, summed across shows (someone who watched several shows counts once per show); Sunday Oct 11 isn't processed by YouTube yet.</p>
-    <p class="note y2025">How many times YouTube showed the thumbnails and how often that became a view, lifetime to date. Unique viewers weren't collected for 2025.</p>
+    <p class="note y2025">How many times YouTube showed the thumbnails and how often that became a view, lifetime to date. Unique viewers are from records kept in December 2025.</p>
     <div class="tiles">
       <div class="card"><div class="lbl">Thumbnail impressions</div><div class="big dash-skeleton" data-source="totals" data-field="impressions" data-row="0">—</div></div>
       <div class="card"><div class="lbl">Impressions click-through rate</div><div class="big dash-skeleton" data-source="totals" data-field="ctr" data-row="0">—</div></div>
@@ -188,9 +189,10 @@ html:not([data-year="2025"]) .y2025{display:none!important}
     </div>
   </section>
 
-  <section id="facebook" class="y2026">
+  <section id="facebook">
     <h1 class="sect">Facebook</h1>
-    <p class="note">14 live shows on the Balloon Fiesta Page (the Friday bonus show was pulled and the Awards Ceremony wasn't uploaded). From Meta Business Suite, lifetime through Oct 12. Facebook counts a "view" whenever the video starts playing, even for a moment in the feed, so its views run much higher than YouTube's; watch time is the fairer comparison.</p>
+    <p class="note y2026">14 live shows on the Balloon Fiesta Page (the Friday bonus show was pulled and the Awards Ceremony wasn't uploaded). From Meta Business Suite, lifetime through Oct 12. Facebook counts a "view" whenever the video starts playing, even for a moment in the feed, so its views run much higher than YouTube's; watch time is the fairer comparison.</p>
+    <p class="note y2025">14 live shows on the Balloon Fiesta Page, from snapshots taken before Facebook deleted the videos (30 days after airing). The Awards Ceremony wasn't posted to Facebook. Views and reach are the final recorded figures; 3-second views are from the live broadcasts. Watch time, live peaks and engagement weren't captured.</p>
     <div class="tiles">
       <div class="card"><div class="lbl">Avg peak live viewers / show (approx.)</div><div class="big dash-skeleton" data-source="fbtotals" data-field="avg_peak" data-row="0">—</div></div>
       <div class="card"><div class="lbl">Views</div><div class="big dash-skeleton" data-source="fbtotals" data-field="views" data-row="0">—</div></div>
@@ -202,9 +204,10 @@ html:not([data-year="2025"]) .y2025{display:none!important}
     </div>
   </section>
 
-  <section class="card y2026" id="platforms">
+  <section class="card" id="platforms">
     <h2>YouTube vs Facebook — same 14 shows</h2>
-    <p class="note">Excludes the Friday bonus show and the Awards Ceremony, which weren't on Facebook.</p>
+    <p class="note y2026">Excludes the Friday bonus show and the Awards Ceremony, which weren't on Facebook.</p>
+    <p class="note y2025">The 14 live shows on both platforms. Facebook watch time, live peaks and engagement weren't captured for 2025, so those show as —.</p>
     <div class="scroll">
       <table id="cmp" data-source="compare" data-row-key="platform">
         <thead><tr>
@@ -219,9 +222,10 @@ html:not([data-year="2025"]) .y2025{display:none!important}
     <div class="tip" id="tip2"></div>
   </section>
 
-  <section class="card y2026" id="fb-shows">
+  <section class="card" id="fb-shows">
     <h2>Facebook — all 14 shows</h2>
-    <p class="note">Peak live viewers are read from each stream's Live Producer chart (Facebook doesn't publish a number), so they're approximate, within about 5%, rounded to the nearest 10. Viewers for Oct 7 AM and Oct 8 AM show as 0 in Facebook's data, so they're left blank here.</p>
+    <p class="note y2026">Peak live viewers are read from each stream's Live Producer chart (Facebook doesn't publish a number), so they're approximate, within about 5%, rounded to the nearest 10. Viewers for Oct 7 AM and Oct 8 AM show as 0 in Facebook's data, so they're left blank here.</p>
+    <p class="note y2025">Final figures recorded before the videos were deleted. Average play time was recorded for the first six shows only.</p>
     <div class="scroll">
       <table id="fbtbl" data-source="fb" data-row-key="id">
         <thead><tr>
@@ -250,15 +254,16 @@ dash.calc('combined', {
   description: 'Views, watch time and engagement summed across both platforms; live audience adds each show\'s YouTube and Facebook peaks for the 14 shows streamed on both.',
   fn: (stats, fb) => {
     const n = (rows, k) => rows.reduce((s, r) => s + (r[k] === '' || r[k] == null ? 0 : Number(r[k])), 0);
+    const has = k => fb.some(r => r[k] !== '' && r[k] != null);
     const ytPeak = new Map(stats.map(r => [r.id, Number(r.peak_live || 0)]));
     const both = fb.map(r => Number(r.peak_live) + (ytPeak.get(r.id) || 0));
     return [{
       views: n(stats, 'views') + n(fb, 'views'),
-      watch_hours: Math.round(n(stats, 'watch_hours') + n(fb, 'watch_hours')),
-      avg_peak: Math.round(both.reduce((a, b) => a + b, 0) / both.length),
-      max_peak: Math.max(...both),
-      likes: n(stats, 'likes') + n(fb, 'reactions'),
-      conversation: n(stats, 'chat_messages') + n(stats, 'comments') + n(fb, 'comments')
+      watch_hours: has('watch_hours') ? Math.round(n(stats, 'watch_hours') + n(fb, 'watch_hours')) : null,
+      avg_peak: has('peak_live') ? Math.round(both.reduce((a, b) => a + b, 0) / both.length) : null,
+      max_peak: has('peak_live') ? Math.max(...both) : null,
+      likes: has('reactions') ? n(stats, 'likes') + n(fb, 'reactions') : null,
+      conversation: has('comments') ? n(stats, 'chat_messages') + n(stats, 'comments') + n(fb, 'comments') : null
     }];
   }
 });
@@ -286,11 +291,12 @@ dash.calc('totals', {
 });
 
 window.BF_applyYear = (y) => {
-  document.getElementById('page-title').textContent = y === '2025' ? 'Balloon Fiesta Live! 2025 — YouTube' : 'Balloon Fiesta Live! 2026 — YouTube & Facebook';
+  document.getElementById('page-title').textContent = y === '2025' ? 'Balloon Fiesta Live! 2025 — YouTube & Facebook' : 'Balloon Fiesta Live! 2026 — YouTube & Facebook';
   document.title = `Balloon Fiesta Live! ${y} Stats`;
 };
 const fmtC = new Intl.NumberFormat('en', {notation: 'compact', maximumFractionDigits: 1});
 const fmt = d3.format(',');
+const nf = v => v == null ? '—' : fmt(v);
 const dayFmt = d => d3.utcFormat('%a %b %-d')(new Date(d + 'T12:00:00Z'));
 let sortKey = 'date', sortDir = 1;
 
@@ -305,14 +311,14 @@ function draw() {
       el.classList.remove('dash-skeleton');
       const v = D.data[0][el.dataset.field];
       const f = el.dataset.field;
-      el.textContent = (f === 'unique_viewers' && !v) ? '—' : f === 'hours_streamed' ? d3.format('.1f')(v) : f === 'ctr' ? d3.format('.1%')(v) : (v >= 1e6 ? d3.format('.3s')(v).replace('G','B') : v >= 10000 ? fmtC.format(v) : fmt(v));
+      el.textContent = (v == null || (f === 'unique_viewers' && !v)) ? '—' : f === 'hours_streamed' ? d3.format('.1f')(v) : f === 'ctr' ? d3.format('.1%')(v) : (v >= 1e6 ? d3.format('.3s')(v).replace('G','B') : v >= 10000 ? fmtC.format(v) : fmt(v));
     } else { el.textContent = '—'; if (D.status === 'error') el.classList.remove('dash-skeleton'); }
   });
   const tk = document.getElementById('takeaway');
-  if (window.BF_YEAR === '2025' && T.status === 'ok' && T.data.length && S.status === 'ok') {
-    const t = T.data[0];
-    const allViews = S.data.reduce((a, r) => a + Number(r.views || 0), 0), allWh = Math.round(S.data.reduce((a, r) => a + Number(r.watch_hours || 0), 0));
-    tk.textContent = `${t.shows} live shows and the recorded Awards Ceremony have reached ${fmt(allViews)} views and ${fmt(allWh)} hours of watch time on YouTube, with up to ${fmt(t.max_peak)} people watching live at once.`;
+  if (window.BF_YEAR === '2025' && T.status === 'ok' && T.data.length && S.status === 'ok' && C.status === 'ok' && C.data.length) {
+    const t = T.data[0], c = C.data[0];
+    const ytViews = S.data.reduce((a, r) => a + Number(r.views || 0), 0), allWh = Math.round(S.data.reduce((a, r) => a + Number(r.watch_hours || 0), 0));
+    tk.textContent = `${t.shows} live shows and the recorded Awards Ceremony reached ${fmt(c.views)} views across YouTube and Facebook (${fmt(ytViews)} on YouTube), with ${fmt(allWh)} hours of YouTube watch time and up to ${fmt(t.max_peak)} people watching live on YouTube at once.`;
   } else if (T.status === 'ok' && T.data.length && C.status === 'ok' && C.data.length) {
     const t = T.data[0], c = C.data[0];
     tk.textContent = `${t.shows} live shows and the recorded Awards Ceremony reached ${fmt(c.views)} views and ${fmt(c.watch_hours)} hours of watch time across YouTube and Facebook, with up to ${fmt(c.max_peak)} people watching live at once.`;
@@ -408,9 +414,10 @@ dash.calc('fbtotals', {
   title: 'Facebook totals',
   description: 'Sums across the 14 Facebook live shows.',
   fn: (fb) => {
-    const n = k => fb.reduce((s, r) => s + (r[k] === '' ? 0 : Number(r[k])), 0);
-    return [{avg_peak: Math.round(n('peak_live') / fb.length), views: n('views'), reach: n('reach'), three_sec_views: n('three_sec_views'), watch_hours: Math.round(n('watch_hours')),
-      interactions: n('interactions'), comments: n('comments')}];
+    const has = k => fb.some(r => r[k] !== '' && r[k] != null);
+    const n = k => has(k) ? fb.reduce((s, r) => s + (r[k] === '' ? 0 : Number(r[k])), 0) : null;
+    return [{avg_peak: has('peak_live') ? Math.round(n('peak_live') / fb.length) : null, views: n('views'), reach: n('reach'), three_sec_views: n('three_sec_views'),
+      watch_hours: has('watch_hours') ? Math.round(n('watch_hours')) : null, interactions: n('interactions'), comments: n('comments')}];
   }
 });
 dash.calc('compare', {
@@ -420,10 +427,12 @@ dash.calc('compare', {
   fn: (stats, fb) => {
     const ids = new Set(fb.map(r => r.id));
     const yt = stats.filter(r => ids.has(r.id));
-    const s = (rows, k) => rows.reduce((a, r) => a + Number(r[k] || 0), 0);
+    const has = (rows, k) => rows.some(r => r[k] !== '' && r[k] != null);
+    const s = (rows, k) => has(rows, k) ? rows.reduce((a, r) => a + Number(r[k] || 0), 0) : null;
     const row = (platform, rows, likeKey) => {
       const v = s(rows, 'views'), w = s(rows, 'watch_hours');
-      return {platform, avg_peak: Math.round(s(rows, 'peak_live') / rows.length), views: v, watch_hours: Math.round(w), avg_watch_min: Math.round(w * 60 / v * 10) / 10, reactions: s(rows, likeKey), comments: s(rows, 'comments')};
+      return {platform, avg_peak: has(rows, 'peak_live') ? Math.round(s(rows, 'peak_live') / rows.length) : null, views: v, watch_hours: w == null ? null : Math.round(w),
+        avg_watch_min: w == null ? null : Math.round(w * 60 / v * 10) / 10, reactions: s(rows, likeKey), comments: s(rows, 'comments')};
     };
     return [row('YouTube', yt, 'likes'), row('Facebook', fb, 'reactions')];
   }
@@ -432,13 +441,13 @@ let fbKey = 'date', fbDir = 1;
 function drawFB() {
   const F = dash.data('fb'), FT = dash.data('fbtotals'), CP = dash.data('compare'), S = dash.data('stats');
   document.querySelectorAll('.big[data-source=fbtotals]').forEach(el => {
-    if (FT.status === 'ok' && FT.data.length) { el.classList.remove('dash-skeleton'); const v = FT.data[0][el.dataset.field]; el.textContent = v >= 10000 ? fmtC.format(v) : fmt(v); }
+    if (FT.status === 'ok' && FT.data.length) { el.classList.remove('dash-skeleton'); const v = FT.data[0][el.dataset.field]; el.textContent = v == null ? '—' : v >= 10000 ? fmtC.format(v) : fmt(v); }
     else { el.textContent = '—'; if (FT.status === 'error') el.classList.remove('dash-skeleton'); }
   });
   const cb = document.querySelector('#cmp tbody'); cb.innerHTML = '';
   if (CP.status === 'ok') CP.data.forEach(r => {
     const tr = document.createElement('tr'); tr.dataset.key = r.platform;
-    [r.platform, fmt(r.avg_peak), fmt(r.views), fmt(r.watch_hours), d3.format('.1f')(r.avg_watch_min) + ' min', fmt(r.reactions), fmt(r.comments)]
+    [r.platform, nf(r.avg_peak), nf(r.views), nf(r.watch_hours), r.avg_watch_min == null ? '—' : d3.format('.1f')(r.avg_watch_min) + ' min', nf(r.reactions), nf(r.comments)]
       .forEach(v => { const td = document.createElement('td'); td.textContent = v; tr.append(td); });
     cb.append(tr);
   });
@@ -488,7 +497,7 @@ function drawFB() {
     const c0 = document.createElement('td'); const nm = document.createElement('div'); nm.textContent = r.show;
     const sb = document.createElement('div'); sb.className = 'sub'; sb.textContent = `${dayFmt(r.date)} ${r.session}`; c0.append(nm, sb); tr.append(c0);
     const n = k => r[k] === '' ? '—' : fmt(Number(r[k]));
-    [r.length, n('peak_live'), n('views'), n('viewers'), n('reach'), n('three_sec_views'), d3.format(',.0f')(Number(r.watch_hours)), r.avg_play, n('reactions'), n('comments'), n('shares'), n('interactions')]
+    [r.length, n('peak_live'), n('views'), n('viewers'), n('reach'), n('three_sec_views'), r.watch_hours === '' ? '—' : d3.format(',.0f')(Number(r.watch_hours)), r.avg_play || '—', n('reactions'), n('comments'), n('shares'), n('interactions')]
       .forEach(v => { const td = document.createElement('td'); td.textContent = v; tr.append(td); });
     tb.append(tr);
   });
@@ -501,5 +510,5 @@ dash.onData(drawFB);
 </script>
 
 <p class="foot y2026">Source: YouTube Studio, Meta Business Suite and Facebook Live Producer. Data last updated October 12, 2026. Facebook peak live viewers are approximate.</p>
-<p class="foot y2025">Source: YouTube Studio. 2025 data collected October 12, 2026 (lifetime through Oct 11, 2026). Live audience and chat figures are from the original broadcasts.</p>
+<p class="foot y2025">Sources: YouTube Studio, collected October 12, 2026 (lifetime through Oct 11, 2026); YouTube unique viewers and all Facebook figures from records kept before Facebook deleted the 2025 videos. Live audience and chat figures are from the original broadcasts.</p>
 </div></body></html>
