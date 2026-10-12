@@ -144,6 +144,7 @@ html,body{margin:0;background:var(--color-bg);color:var(--color-fg);font-family:
 .masthead img{width:clamp(88px,18vw,150px);height:auto;flex:none}
 .masthead .txt{min-width:0}
 .bf .snap-note{font-size:var(--cds-font-size-caption);color:var(--color-fg-muted);margin:var(--cds-gap-sm) 0 0}
+.bf .exec{color:var(--color-fg);font-weight:var(--cds-font-weight-medium)}
 .bf .up{color:var(--color-ok)} .bf .down{color:var(--color-bad)}
 .bf tr.cur td{font-weight:var(--cds-font-weight-medium)}
 @media (max-width:520px){.masthead{flex-direction:column;align-items:flex-start}}
@@ -173,6 +174,7 @@ html:not([data-year="2025"]) .y2025{display:none!important}
       </div>
     </div>
     <p class="lede" id="takeaway" data-source="totals combined">—</p>
+    <p class="lede y2026 exec" id="exec"></p>
     <p class="snap-note" id="snap-note"></p>
     <p class="lede y2025" id="fb-missing">Facebook removes live videos after 30 days. Its 2025 numbers come from snapshots taken before they were deleted, so they're the same at every point in time, and Facebook watch time, live peaks and engagement weren't captured and show as —.</p>
     <p class="lede y2026" id="tv-note">The shows also aired on Balloon Fiesta TV (low-power channel 28, over the air) and Comcast Cable channel 27 (Community Access). Viewer numbers aren't available for those broadcasts, so they aren't included in these totals.</p>
@@ -375,6 +377,18 @@ const yoyRow = (rows) => {
   const r = rows.filter(q => q.id !== '10-02-am');
   return {views: d3.sum(r, q => Number(q.views)), wh: d3.sum(r, q => Number(q.watch_hours))};
 };
+function drawExec() {
+  const el = document.getElementById('exec');
+  const A = BF_ALL.data['2025'] || {}, B = BF_ALL.data['2026'] || {};
+  const k = (A[BF_VIEW] && B[BF_VIEW] && BF_VIEW !== 'now') ? BF_VIEW : 'end';
+  if (BF_ALL.status !== 'ok' || !A[k] || !B[k]) { el.textContent = ''; return; }
+  const a = yoyRow(A[k]), b = yoyRow(B[k]);
+  const pk = rows => { const l = rows.filter(q => q.type === 'Live' && q.id !== '10-02-am'); return d3.mean(l, q => Number(q.peak_live)); };
+  const pa = pk(A[k]), pb = pk(B[k]);
+  const pct = (x, y) => { const v = y / x - 1; return `${v >= 0 ? 'up' : 'down'} ${d3.format('.0%')(Math.abs(v))}`; };
+  el.textContent = `Compared with 2025 at the same point (${BF_SNAP_NAMES[k]}, same 14 live shows plus the Awards): YouTube views are ${pct(a.views, b.views)} to ${fmt(b.views)}, watch time is ${pct(a.wh, b.wh)} to ${fmt(Math.round(b.wh))} hours, and the average peak live audience is ${pct(pa, pb)} to ${fmt(Math.round(pb))} per show${BF_YEARS['2026'].snaps[k].prelim ? ' (preliminary)' : ''}.`;
+}
+dash.onData(drawExec);
 function drawYoY() {
   const tb = document.querySelector('#yoytbl tbody'); tb.innerHTML = '';
   if (BF_ALL.status !== 'ok') return;
