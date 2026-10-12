@@ -1,0 +1,431 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Balloon Fiesta Live! 2026 Stats</title>
+<style>
+:root{
+ --font-anthropic-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+ --font-anthropic-serif: Georgia, "Times New Roman", serif;
+ --color-fg:#1f1e1d; --color-fg-muted:#6b6a68; --color-bg:#faf9f5; --color-panel:#ffffff; --color-border-line:#e5e3dc;
+ --color-ok:#2e7d32; --color-warn:#b26a00; --color-bad:#c62828;
+ --cds-font-size-caption:12px; --cds-font-size-body:14px; --cds-font-size-heading:16px; --cds-font-size-title:28px; --cds-font-weight-medium:600;
+ --cds-gap-xs:4px; --cds-gap-sm:8px; --cds-gap-md:12px; --cds-gap-lg:20px; --cds-gap-xl:32px;
+ --cds-pad-xs:4px; --cds-pad-sm:8px; --cds-pad-md:12px; --cds-pad-lg:16px; --cds-radius:10px;
+ --cds-chart-grid:#ecebe6; --cds-chart-axis:#c9c7bf; --cds-surface-popover:#ffffff; --cds-border:#e5e3dc;
+ --cds-shadow-popover:0 4px 14px rgba(0,0,0,.12); --cds-text-secondary:#6b6a68; --cds-dur-slow:.3s;
+}
+@media (prefers-color-scheme: dark){:root{
+ --color-fg:#ecebe6; --color-fg-muted:#a6a49e; --color-bg:#1f1e1d; --color-panel:#2a2927; --color-border-line:#3d3b38;
+ --cds-chart-grid:#363431; --cds-chart-axis:#55524d; --cds-surface-popover:#2a2927; --cds-border:#3d3b38; --cds-text-secondary:#a6a49e;}}
+html,body{margin:0;background:var(--color-bg);color:var(--color-fg);font-family:var(--font-anthropic-sans);font-size:14px}
+#dash-root{max-width:1200px;margin:0 auto;padding:24px 16px 40px}
+.bf .dash-skeleton{color:transparent}
+.foot{color:var(--color-fg-muted);font-size:12px;margin-top:24px}
+.bf .scroll{max-height:none!important}
+@media print{.bf .tip{display:none!important} .bf .card{break-inside:avoid}}
+</style>
+<script src="assets/d3.min.js"></script>
+<script>
+(function(){
+  const SOURCES = {stats:'data/youtube-2026.csv', fb:'data/facebook-2026.csv'};
+  const DATA = {}, calcs = {}, fns = [];
+  let status = 'loading';
+  window.dash = {
+    colors: ['#3b6ea8','#c46f2b','#1877F2','#5a9e6f','#8e6bb8','#c4a42b','#d0587e','#4aa3a8'],
+    data(id){
+      if (status !== 'ok') return {status, data:[], rows:[], meta:[]};
+      if (DATA[id]) return {status:'ok', data:DATA[id], rows:DATA[id], columns:DATA[id].columns||[], meta:[]};
+      if (calcs[id]) { const c=calcs[id]; const out=c.fn(...c.inputs.map(i=>dash.data(i).data)); return {status:'ok', data:out, rows:out, meta:[]}; }
+      return {status:'missing', data:[], meta:[]};
+    },
+    calc(id, spec){ calcs[id]=spec; },
+    onData(fn){ fns.push(fn); },
+    refresh(){}, params(){return {};}, setParams(){}, resetParams(){}, setLink(){}
+  };
+  const run = () => fns.forEach(f=>{ try{ f(); }catch(e){ console.error(e); } });
+  let t; window.addEventListener('resize',()=>{clearTimeout(t); t=setTimeout(run,150);});
+  window.addEventListener('DOMContentLoaded',()=>{
+    run();
+    Promise.all(Object.entries(SOURCES).map(([k,u]) => d3.csv(u + '?v=' + Date.now()).then(rows => { DATA[k]=rows; })))
+      .then(()=>{ status='ok'; run(); })
+      .catch(e=>{ status='error'; console.error(e); run(); });
+  });
+})();
+</script>
+</head><body><div id="dash-root">
+<style>
+.bf{font-family:var(--font-anthropic-sans);display:flex;flex-direction:column;gap:var(--cds-gap-lg)}
+.bf h1{font-family:var(--font-anthropic-serif);font-weight:400;font-size:var(--cds-font-size-title);margin:0}
+.bf .lede{color:var(--color-fg-muted);margin:var(--cds-gap-xs) 0 0}
+.bf .tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,9.5rem),1fr));gap:var(--cds-gap-md)}
+.bf .card{background:var(--color-panel);border:1px solid var(--color-border-line);border-radius:var(--cds-radius);padding:var(--cds-pad-lg);position:relative;min-width:0}
+.bf .lbl{font-size:var(--cds-font-size-caption);color:var(--color-fg-muted)}
+.bf .big{font-family:var(--font-anthropic-serif);font-weight:400;font-size:var(--cds-font-size-title);font-variant-numeric:tabular-nums;margin-top:var(--cds-gap-xs)}
+.bf h1.sect{font-size:var(--cds-font-size-title);margin-top:var(--cds-gap-md)}
+.bf h2{font-size:var(--cds-font-size-heading);font-weight:var(--cds-font-weight-medium);margin:0}
+.bf .note{font-size:var(--cds-font-size-caption);color:var(--color-fg-muted);margin:var(--cds-gap-xs) 0 var(--cds-gap-md)}
+.bf .chart{min-height:300px}
+.bf .legend{display:flex;gap:var(--cds-gap-md);font-size:var(--cds-font-size-caption);color:var(--color-fg-muted);margin-bottom:var(--cds-gap-sm)}
+.bf .sw{display:inline-block;width:.6rem;height:.6rem;border-radius:2px;margin-right:4px;vertical-align:middle}
+.bf .tip{position:absolute;pointer-events:none;background:var(--cds-surface-popover);border:1px solid var(--cds-border);border-radius:var(--cds-radius);box-shadow:var(--cds-shadow-popover);padding:var(--cds-pad-xs) var(--cds-pad-sm);font-size:var(--cds-font-size-caption);display:none;white-space:nowrap;z-index:2}
+.bf .tip .t{color:var(--cds-text-secondary)}
+.bf .scroll{overflow:auto;max-height:36rem}
+.bf table{border-collapse:collapse;width:100%;font-size:var(--cds-font-size-caption);font-variant-numeric:tabular-nums}
+.bf th{position:sticky;top:0;background:var(--color-panel);text-align:right;padding:var(--cds-pad-xs) var(--cds-pad-sm);border-bottom:1px solid var(--color-border-line);white-space:nowrap}
+.bf th button{all:unset;cursor:pointer;color:var(--color-fg-muted)}
+.bf th:first-child,.bf td:first-child{text-align:left}
+.bf td{text-align:right;padding:var(--cds-pad-xs) var(--cds-pad-sm);border-bottom:1px solid var(--color-border-line);white-space:nowrap}
+.bf td:first-child{white-space:normal;min-width:12rem}
+.bf .sub{color:var(--color-fg-muted)}
+.bf .flag{color:var(--color-warn)}
+.bf [data-dash-source-state=refreshing]{opacity:.5;transition:opacity var(--cds-dur-slow)}
+.bf [data-dash-source-state=empty]{color:transparent}
+.bf .fail{display:flex;align-items:center;justify-content:center;gap:6px;color:var(--color-fg-muted);font-size:var(--cds-font-size-caption);min-height:inherit}
+.bf .fail i{width:.375rem;height:.375rem;border-radius:50%;background:var(--color-bad)}
+</style>
+<div class="bf">
+  <header id="top">
+    <h1>Balloon Fiesta Live! 2026 — YouTube &amp; Facebook</h1>
+    <p class="lede" id="takeaway" data-source="totals">—</p>
+  </header>
+
+  <h1 class="sect">YouTube</h1>
+  <section class="tiles" id="kpis">
+    <div class="card"><div class="lbl">Live shows · total views</div><div class="big dash-skeleton" data-source="totals" data-field="views" data-row="0">—</div></div>
+    <div class="card"><div class="lbl">Watch time (hours)</div><div class="big dash-skeleton" data-source="totals" data-field="watch_hours" data-row="0">—</div></div>
+    <div class="card"><div class="lbl">Hours streamed</div><div class="big dash-skeleton" data-source="totals" data-field="hours_streamed" data-row="0">—</div></div>
+    <div class="card"><div class="lbl">Avg peak live viewers / show</div><div class="big dash-skeleton" data-source="totals" data-field="avg_peak" data-row="0">—</div></div>
+    <div class="card"><div class="lbl">Top peak live</div><div class="big dash-skeleton" data-source="totals" data-field="max_peak" data-row="0">—</div></div>
+    <div class="card"><div class="lbl">New subscribers</div><div class="big dash-skeleton" data-source="totals" data-field="subs" data-row="0">—</div></div>
+  </section>
+
+  <section id="reach">
+    <h2>Reach</h2>
+    <p class="note">How many times YouTube showed the thumbnails, how often that became a view, and roughly how many different people watched each show. Unique viewers are YouTube's rounded estimates, summed across shows (someone who watched several shows counts once per show); Sunday Oct 11 isn't processed by YouTube yet.</p>
+    <div class="tiles">
+      <div class="card"><div class="lbl">Thumbnail impressions</div><div class="big dash-skeleton" data-source="totals" data-field="impressions" data-row="0">—</div></div>
+      <div class="card"><div class="lbl">Impressions click-through rate</div><div class="big dash-skeleton" data-source="totals" data-field="ctr" data-row="0">—</div></div>
+      <div class="card"><div class="lbl">Unique viewers (sum of 14 shows)</div><div class="big dash-skeleton" data-source="totals" data-field="unique_viewers" data-row="0">—</div></div>
+    </div>
+  </section>
+
+  <section class="card" id="live-viewers">
+    <h2>Live viewers by show</h2>
+    <p class="note">Peak and average concurrent viewers while each stream was live. Mornings (AM) consistently draw about twice the evening audience.</p>
+    <div class="legend"><span><span class="sw" id="sw0"></span>Peak</span><span><span class="sw" id="sw1"></span>Average</span></div>
+    <div class="chart" id="chart" data-source="stats"></div>
+    <div class="tip" id="tip"></div>
+  </section>
+
+  <section class="card" id="all-shows">
+    <h2>All 16 shows</h2>
+    <p class="note">Views and watch time are lifetime through Oct 11 (YouTube analytics lags about a day). Click a column to sort. The recorded Awards Ceremony was posted Saturday afternoon and is a niche show, so its smaller numbers are expected. <span class="flag">▲</span> marks an "average % viewed" figure YouTube reports higher than average view duration ÷ length would give — likely a replay-trim or processing quirk on YouTube's side.</p>
+    <div class="scroll">
+      <table id="tbl" data-source="stats" data-row-key="id">
+        <thead><tr>
+          <th data-field="show"><button data-k="date">Show</button></th>
+          <th data-field="length"><button data-k="length_min">Length</button></th>
+          <th data-field="peak_live"><button data-k="peak_live">Peak live</button></th>
+          <th data-field="avg_live"><button data-k="avg_live">Avg live</button></th>
+          <th data-field="views"><button data-k="views">Views</button></th>
+          <th data-field="unique_viewers"><button data-k="unique_viewers">Unique viewers</button></th>
+          <th data-field="impressions"><button data-k="impressions">Impressions</button></th>
+          <th data-field="impressions_ctr"><button data-k="impressions_ctr">CTR</button></th>
+          <th data-field="external_pct"><button data-k="external_pct">External views</button></th>
+          <th data-field="avg_view_duration"><button data-k="avg_view_min">Avg watch</button></th>
+          <th data-field="avg_pct_viewed"><button data-k="avg_pct_viewed">% viewed</button></th>
+          <th data-field="watch_hours"><button data-k="watch_hours">Watch hrs</button></th>
+          <th data-field="chat_messages"><button data-k="chat_messages">Chat msgs</button></th>
+          <th data-field="subs_gained"><button data-k="subs_gained">Subs</button></th>
+          <th data-field="likes"><button data-k="likes">Likes</button></th>
+        </tr></thead>
+        <tbody></tbody>
+      </table>
+    </div>
+  </section>
+
+  <section id="facebook">
+    <h1 class="sect">Facebook</h1>
+    <p class="note">14 live shows on the Balloon Fiesta Page (the Friday bonus show was pulled and the Awards Ceremony wasn't uploaded). From Meta Business Suite, lifetime through Oct 12. Facebook counts a "view" whenever the video starts playing, even for a moment in the feed, so its views run much higher than YouTube's; watch time is the fairer comparison.</p>
+    <div class="tiles">
+      <div class="card"><div class="lbl">Avg peak live viewers / show (approx.)</div><div class="big dash-skeleton" data-source="fbtotals" data-field="avg_peak" data-row="0">—</div></div>
+      <div class="card"><div class="lbl">Views</div><div class="big dash-skeleton" data-source="fbtotals" data-field="views" data-row="0">—</div></div>
+      <div class="card"><div class="lbl">Reach (accounts)</div><div class="big dash-skeleton" data-source="fbtotals" data-field="reach" data-row="0">—</div></div>
+      <div class="card"><div class="lbl">3-second views</div><div class="big dash-skeleton" data-source="fbtotals" data-field="three_sec_views" data-row="0">—</div></div>
+      <div class="card"><div class="lbl">Watch time (hours)</div><div class="big dash-skeleton" data-source="fbtotals" data-field="watch_hours" data-row="0">—</div></div>
+      <div class="card"><div class="lbl">Interactions</div><div class="big dash-skeleton" data-source="fbtotals" data-field="interactions" data-row="0">—</div></div>
+      <div class="card"><div class="lbl">Comments</div><div class="big dash-skeleton" data-source="fbtotals" data-field="comments" data-row="0">—</div></div>
+    </div>
+  </section>
+
+  <section class="card" id="platforms">
+    <h2>YouTube vs Facebook — same 14 shows</h2>
+    <p class="note">Excludes the Friday bonus show and the Awards Ceremony, which weren't on Facebook.</p>
+    <div class="scroll">
+      <table id="cmp" data-source="compare" data-row-key="platform">
+        <thead><tr>
+          <th data-field="platform">Platform</th><th data-field="avg_peak">Avg peak live</th><th data-field="views">Views</th><th data-field="watch_hours">Watch hrs</th>
+          <th data-field="avg_watch_min">Avg watch / view</th><th data-field="reactions">Likes & reactions</th><th data-field="comments">Comments</th>
+        </tr></thead><tbody></tbody>
+      </table>
+    </div>
+    <h2 style="margin-top:var(--cds-gap-lg)">Watch time by show</h2>
+    <div class="legend"><span><span class="sw" id="swy"></span>YouTube</span><span><span class="sw" id="swf"></span>Facebook</span></div>
+    <div class="chart" id="chart2" data-source="stats fb"></div>
+    <div class="tip" id="tip2"></div>
+  </section>
+
+  <section class="card" id="fb-shows">
+    <h2>Facebook — all 14 shows</h2>
+    <p class="note">Peak live viewers are read from each stream's Live Producer chart (Facebook doesn't publish a number), so they're approximate, within about 5%, rounded to the nearest 10. Viewers for Oct 7 AM and Oct 8 AM show as 0 in Facebook's data, so they're left blank here.</p>
+    <div class="scroll">
+      <table id="fbtbl" data-source="fb" data-row-key="id">
+        <thead><tr>
+          <th data-field="show"><button data-k="date">Show</button></th>
+          <th data-field="length"><button data-k="length_min">Length</button></th>
+          <th data-field="peak_live"><button data-k="peak_live">Peak live (approx.)</button></th>
+          <th data-field="views"><button data-k="views">Views</button></th>
+          <th data-field="viewers"><button data-k="viewers">Viewers</button></th>
+          <th data-field="reach"><button data-k="reach">Reach</button></th>
+          <th data-field="three_sec_views"><button data-k="three_sec_views">3-sec views</button></th>
+          <th data-field="watch_hours"><button data-k="watch_hours">Watch hrs</button></th>
+          <th data-field="avg_play"><button data-k="avg_play_sec">Avg play time</button></th>
+          <th data-field="reactions"><button data-k="reactions">Reactions</button></th>
+          <th data-field="comments"><button data-k="comments">Comments</button></th>
+          <th data-field="shares"><button data-k="shares">Shares</button></th>
+          <th data-field="interactions"><button data-k="interactions">Interactions</button></th>
+        </tr></thead><tbody></tbody>
+      </table>
+    </div>
+  </section>
+</div>
+<script>
+dash.calc('totals', {
+  inputs: ['stats'],
+  title: 'Live-show totals',
+  description: 'Sums and averages across the 15 live streams (recorded Awards show excluded).',
+  fn: (stats) => {
+    const live = stats.filter(r => r.type === 'Live');
+    const n = k => live.reduce((s, r) => s + Number(r[k]), 0);
+    const peaks = live.map(r => Number(r.peak_live));
+    return [{
+      shows: live.length,
+      views: n('views'),
+      watch_hours: Math.round(n('watch_hours')),
+      hours_streamed: Math.round(n('length_min') / 60 * 10) / 10,
+      avg_peak: Math.round(peaks.reduce((a, b) => a + b, 0) / live.length),
+      max_peak: Math.max(...peaks),
+      subs: n('subs_gained'),
+      impressions: n('impressions'),
+      ctr: live.reduce((s, r) => s + Number(r.impressions) * Number(r.impressions_ctr), 0) / n('impressions') / 100,
+      unique_viewers: live.filter(r => r.unique_viewers !== '').reduce((s, r) => s + Number(r.unique_viewers), 0)
+    }];
+  }
+});
+
+const fmtC = new Intl.NumberFormat('en', {notation: 'compact', maximumFractionDigits: 1});
+const fmt = d3.format(',');
+const dayFmt = d => d3.utcFormat('%a %b %-d')(new Date(d + 'T12:00:00Z'));
+let sortKey = 'date', sortDir = 1;
+
+function fail(el) { el.innerHTML = ''; const d = document.createElement('div'); d.className = 'fail'; d.innerHTML = '<i></i>'; d.append('Failed to load'); el.append(d); }
+
+function draw() {
+  const S = dash.data('stats'), T = dash.data('totals');
+  // tiles
+  document.querySelectorAll('.big[data-source=totals]').forEach(el => {
+    if (T.status === 'ok' && T.data.length) {
+      el.classList.remove('dash-skeleton');
+      const v = T.data[0][el.dataset.field];
+      const f = el.dataset.field;
+      el.textContent = f === 'hours_streamed' ? d3.format('.1f')(v) : f === 'ctr' ? d3.format('.1%')(v) : (v >= 10000 ? fmtC.format(v) : fmt(v));
+    } else { el.textContent = '—'; if (T.status === 'error') el.classList.remove('dash-skeleton'); }
+  });
+  const tk = document.getElementById('takeaway');
+  if (T.status === 'ok' && T.data.length) {
+    const t = T.data[0];
+    tk.textContent = `${t.shows} live shows plus the recorded Awards Ceremony drew ${fmt(t.views)} views and ${fmt(t.watch_hours)} hours of watch time on the live streams alone.`;
+  } else tk.textContent = '—';
+
+  const chart = document.getElementById('chart');
+  const tbody = document.querySelector('#tbl tbody');
+  document.getElementById('sw0').style.background = dash.colors[0];
+  document.getElementById('sw1').style.background = dash.colors[1];
+  if (S.status !== 'ok') { chart.innerHTML = ''; tbody.innerHTML = ''; if (S.status === 'error') fail(chart); return; }
+
+  // chart
+  const live = S.data.filter(r => r.type === 'Live').map(r => ({...r, peak: Number(r.peak_live), avg: Number(r.avg_live)}));
+  chart.innerHTML = '';
+  const W = chart.clientWidth || 600, H = 300, m = {t: 10, r: 8, b: 56, l: 44};
+  const x = d3.scaleBand(live.map(d => d.id), [m.l, W - m.r]).padding(0.25);
+  const xs = d3.scaleBand(['peak', 'avg'], [0, x.bandwidth()]).padding(0.1);
+  const y = d3.scaleLinear([0, d3.max(live, d => d.peak) * 1.08], [H - m.b, m.t]).nice();
+  const svg = d3.select(chart).append('svg').attr('width', '100%').attr('viewBox', `0 0 ${W} ${H}`);
+  svg.append('g').selectAll('line').data(y.ticks(5)).join('line')
+    .attr('x1', m.l).attr('x2', W - m.r).attr('y1', d => y(d)).attr('y2', d => y(d)).attr('stroke', 'var(--cds-chart-grid)');
+  const ya = svg.append('g').attr('transform', `translate(${m.l},0)`).call(d3.axisLeft(y).ticks(5).tickFormat(d3.format('~s')).tickSize(0));
+  ya.attr('font-size', null).attr('font-family', null).select('.domain').remove();
+  ya.selectAll('text').attr('fill', 'var(--color-fg-muted)').style('font-size', 'var(--cds-font-size-caption)');
+  const step = W < 520 ? 2 : 1;
+  const xa = svg.append('g').attr('transform', `translate(0,${H - m.b})`)
+    .call(d3.axisBottom(x).tickSize(0).tickFormat((id, i) => { if (i % step) return ''; const d = live.find(r => r.id === id); return d3.utcFormat('%-m/%-d')(new Date(d.date + 'T12:00:00Z')) + ' ' + d.session; }));
+  xa.attr('font-size', null).attr('font-family', null);
+  xa.select('.domain').attr('stroke', 'var(--cds-chart-axis)');
+  xa.selectAll('text').attr('fill', 'var(--color-fg-muted)').style('font-size', 'var(--cds-font-size-caption)')
+    .attr('transform', 'rotate(-40)').attr('text-anchor', 'end').attr('dx', '-0.3em').attr('dy', '0.6em');
+  const tip = document.getElementById('tip');
+  const g = svg.append('g').selectAll('g').data(live).join('g').attr('transform', d => `translate(${x(d.id)},0)`);
+  g.selectAll('rect').data(d => [{k: 'peak', v: d.peak, d}, {k: 'avg', v: d.avg, d}]).join('rect')
+    .attr('x', b => xs(b.k)).attr('width', xs.bandwidth()).attr('y', b => y(b.v)).attr('height', b => y(0) - y(b.v))
+    .attr('rx', 3).attr('fill', b => b.k === 'peak' ? dash.colors[0] : dash.colors[1]);
+  g.append('rect').attr('width', x.bandwidth()).attr('y', m.t).attr('height', H - m.b - m.t).attr('fill', 'transparent')
+    .on('mousemove', (ev, d) => {
+      const box = chart.parentElement.getBoundingClientRect();
+      tip.innerHTML = '';
+      const t = document.createElement('div'); t.className = 't'; t.textContent = `${dayFmt(d.date)} ${d.session} · ${d.show}`; tip.append(t);
+      [['Peak', d.peak, 0], ['Average', d.avg, 1]].forEach(([n, v, i]) => {
+        const r = document.createElement('div'); const s = document.createElement('span'); s.className = 'sw'; s.style.background = dash.colors[i];
+        r.append(s, `${n}: ${fmt(v)}`); tip.append(r);
+      });
+      tip.style.display = 'block';
+      let lx = ev.clientX - box.left + 12; const tw = tip.offsetWidth;
+      if (lx + tw > box.width - 8) lx = ev.clientX - box.left - tw - 12;
+      tip.style.left = Math.max(4, lx) + 'px'; tip.style.top = (ev.clientY - box.top - 10) + 'px';
+    })
+    .on('mouseleave', () => { tip.style.display = 'none'; });
+
+  // table
+  const rows = S.data.slice().sort((a, b) => {
+    const A = a[sortKey], B = b[sortKey];
+    const nA = Number(A), nB = Number(B);
+    if (sortKey !== 'date' && A !== '' && B !== '' && !isNaN(nA) && !isNaN(nB)) return (nA - nB) * sortDir;
+    if (A === '' ) return 1; if (B === '') return -1;
+    return (A < B ? -1 : A > B ? 1 : (a.session < b.session ? -1 : 1)) * sortDir;
+  });
+  tbody.innerHTML = '';
+  rows.forEach(r => {
+    const tr = document.createElement('tr'); tr.dataset.key = r.id;
+    const c0 = document.createElement('td');
+    const nm = document.createElement('div'); nm.textContent = r.show;
+    const sb = document.createElement('div'); sb.className = 'sub';
+    sb.textContent = r.type === 'Recorded' ? 'Recorded · uploaded Oct 10' : `${dayFmt(r.date)} ${r.session}`;
+    c0.append(nm, sb); tr.append(c0);
+    const n = k => r[k] === '' ? '—' : fmt(Number(r[k]));
+    const pctFlag = Number(r.avg_pct_viewed) > (Number(r.avg_view_min) / Number(r.length_min) * 100) + 2;
+    const pc = k => r[k] === '' ? '—' : r[k] + '%';
+    const cells = [r.length, n('peak_live'), n('avg_live'), n('views'), n('unique_viewers'), n('impressions'), pc('impressions_ctr'), pc('external_pct'), r.avg_view_duration,
+      r.avg_pct_viewed + '%' + (pctFlag ? ' ▲' : ''), d3.format(',.0f')(Number(r.watch_hours)), n('chat_messages'), n('subs_gained'), n('likes')];
+    cells.forEach((v, i) => { const td = document.createElement('td'); td.textContent = v; if (i === 9 && pctFlag) td.className = 'flag'; tr.append(td); });
+    tbody.append(tr);
+  });
+  document.querySelectorAll('#tbl th').forEach(th => {
+    const k = th.querySelector('button').dataset.k;
+    th.setAttribute('aria-sort', k === sortKey ? (sortDir > 0 ? 'ascending' : 'descending') : 'none');
+  });
+}
+
+document.querySelectorAll('#tbl th button').forEach(b => b.addEventListener('click', () => {
+  const k = b.dataset.k;
+  if (sortKey === k) sortDir = -sortDir; else { sortKey = k; sortDir = k === 'date' ? 1 : -1; }
+  draw();
+}));
+dash.onData(draw);
+
+dash.calc('fbtotals', {
+  inputs: ['fb'],
+  title: 'Facebook totals',
+  description: 'Sums across the 14 Facebook live shows.',
+  fn: (fb) => {
+    const n = k => fb.reduce((s, r) => s + (r[k] === '' ? 0 : Number(r[k])), 0);
+    return [{avg_peak: Math.round(n('peak_live') / fb.length), views: n('views'), reach: n('reach'), three_sec_views: n('three_sec_views'), watch_hours: Math.round(n('watch_hours')),
+      interactions: n('interactions'), comments: n('comments')}];
+  }
+});
+dash.calc('compare', {
+  inputs: ['stats', 'fb'],
+  title: 'YouTube vs Facebook',
+  description: 'Totals for the 14 shows streamed on both platforms (YouTube rows matched to Facebook by show id).',
+  fn: (stats, fb) => {
+    const ids = new Set(fb.map(r => r.id));
+    const yt = stats.filter(r => ids.has(r.id));
+    const s = (rows, k) => rows.reduce((a, r) => a + Number(r[k] || 0), 0);
+    const row = (platform, rows, likeKey) => {
+      const v = s(rows, 'views'), w = s(rows, 'watch_hours');
+      return {platform, avg_peak: Math.round(s(rows, 'peak_live') / rows.length), views: v, watch_hours: Math.round(w), avg_watch_min: Math.round(w * 60 / v * 10) / 10, reactions: s(rows, likeKey), comments: s(rows, 'comments')};
+    };
+    return [row('YouTube', yt, 'likes'), row('Facebook', fb, 'reactions')];
+  }
+});
+let fbKey = 'date', fbDir = 1;
+function drawFB() {
+  const F = dash.data('fb'), FT = dash.data('fbtotals'), CP = dash.data('compare'), S = dash.data('stats');
+  document.querySelectorAll('.big[data-source=fbtotals]').forEach(el => {
+    if (FT.status === 'ok' && FT.data.length) { el.classList.remove('dash-skeleton'); const v = FT.data[0][el.dataset.field]; el.textContent = v >= 10000 ? fmtC.format(v) : fmt(v); }
+    else { el.textContent = '—'; if (FT.status === 'error') el.classList.remove('dash-skeleton'); }
+  });
+  const cb = document.querySelector('#cmp tbody'); cb.innerHTML = '';
+  if (CP.status === 'ok') CP.data.forEach(r => {
+    const tr = document.createElement('tr'); tr.dataset.key = r.platform;
+    [r.platform, fmt(r.avg_peak), fmt(r.views), fmt(r.watch_hours), d3.format('.1f')(r.avg_watch_min) + ' min', fmt(r.reactions), fmt(r.comments)]
+      .forEach(v => { const td = document.createElement('td'); td.textContent = v; tr.append(td); });
+    cb.append(tr);
+  });
+  document.getElementById('swy').style.background = dash.colors[0];
+  document.getElementById('swf').style.background = dash.colors[2];
+  const ch = document.getElementById('chart2'); ch.innerHTML = '';
+  if (F.status === 'ok' && S.status === 'ok') {
+    const ytBy = new Map(S.data.map(r => [r.id, Number(r.watch_hours)]));
+    const d = F.data.map(r => ({id: r.id, date: r.date, session: r.session, show: r.show, yt: ytBy.get(r.id) || 0, fb: Number(r.watch_hours)}));
+    const W = ch.clientWidth || 600, H = 300, m = {t: 10, r: 8, b: 56, l: 44};
+    const x = d3.scaleBand(d.map(r => r.id), [m.l, W - m.r]).padding(0.25);
+    const xs = d3.scaleBand(['yt', 'fb'], [0, x.bandwidth()]).padding(0.1);
+    const y = d3.scaleLinear([0, d3.max(d, r => Math.max(r.yt, r.fb)) * 1.08], [H - m.b, m.t]).nice();
+    const svg = d3.select(ch).append('svg').attr('width', '100%').attr('viewBox', `0 0 ${W} ${H}`);
+    svg.append('g').selectAll('line').data(y.ticks(5)).join('line').attr('x1', m.l).attr('x2', W - m.r).attr('y1', v => y(v)).attr('y2', v => y(v)).attr('stroke', 'var(--cds-chart-grid)');
+    const ya = svg.append('g').attr('transform', `translate(${m.l},0)`).call(d3.axisLeft(y).ticks(5).tickFormat(d3.format('~s')).tickSize(0));
+    ya.attr('font-size', null).attr('font-family', null).select('.domain').remove();
+    ya.selectAll('text').attr('fill', 'var(--color-fg-muted)').style('font-size', 'var(--cds-font-size-caption)');
+    const step = W < 520 ? 2 : 1;
+    const xa = svg.append('g').attr('transform', `translate(0,${H - m.b})`).call(d3.axisBottom(x).tickSize(0).tickFormat((id, i) => { if (i % step) return ''; const r = d.find(q => q.id === id); return d3.utcFormat('%-m/%-d')(new Date(r.date + 'T12:00:00Z')) + ' ' + r.session; }));
+    xa.attr('font-size', null).attr('font-family', null); xa.select('.domain').attr('stroke', 'var(--cds-chart-axis)');
+    xa.selectAll('text').attr('fill', 'var(--color-fg-muted)').style('font-size', 'var(--cds-font-size-caption)').attr('transform', 'rotate(-40)').attr('text-anchor', 'end').attr('dx', '-0.3em').attr('dy', '0.6em');
+    const tip = document.getElementById('tip2');
+    const g = svg.append('g').selectAll('g').data(d).join('g').attr('transform', r => `translate(${x(r.id)},0)`);
+    g.selectAll('rect').data(r => [{k: 'yt', v: r.yt}, {k: 'fb', v: r.fb}]).join('rect')
+      .attr('x', b => xs(b.k)).attr('width', xs.bandwidth()).attr('y', b => y(b.v)).attr('height', b => y(0) - y(b.v)).attr('rx', 3)
+      .attr('fill', b => b.k === 'yt' ? dash.colors[0] : dash.colors[2]);
+    g.append('rect').attr('width', x.bandwidth()).attr('y', m.t).attr('height', H - m.b - m.t).attr('fill', 'transparent')
+      .on('mousemove', (ev, r) => {
+        const box = ch.parentElement.getBoundingClientRect(); tip.innerHTML = '';
+        const t = document.createElement('div'); t.className = 't'; t.textContent = `${dayFmt(r.date)} ${r.session} · ${r.show}`; tip.append(t);
+        [['YouTube', r.yt, 0], ['Facebook', r.fb, 2]].forEach(([n, v, i]) => { const q = document.createElement('div'); const s = document.createElement('span'); s.className = 'sw'; s.style.background = dash.colors[i]; q.append(s, `${n}: ${fmt(Math.round(v))} hrs`); tip.append(q); });
+        tip.style.display = 'block'; let lx = ev.clientX - box.left + 12; const tw = tip.offsetWidth;
+        if (lx + tw > box.width - 8) lx = ev.clientX - box.left - tw - 12;
+        tip.style.left = Math.max(4, lx) + 'px'; tip.style.top = (ev.clientY - box.top - 10) + 'px';
+      }).on('mouseleave', () => { tip.style.display = 'none'; });
+  } else if (F.status === 'error' || S.status === 'error') fail(ch);
+  const tb = document.querySelector('#fbtbl tbody'); tb.innerHTML = '';
+  if (F.status !== 'ok') return;
+  const rows = F.data.slice().sort((a, b) => {
+    const A = a[fbKey], B = b[fbKey];
+    if (fbKey !== 'date') { if (A === '') return 1; if (B === '') return -1; return (Number(A) - Number(B)) * fbDir; }
+    return (A < B ? -1 : A > B ? 1 : (a.session < b.session ? -1 : 1)) * fbDir;
+  });
+  rows.forEach(r => {
+    const tr = document.createElement('tr'); tr.dataset.key = r.id;
+    const c0 = document.createElement('td'); const nm = document.createElement('div'); nm.textContent = r.show;
+    const sb = document.createElement('div'); sb.className = 'sub'; sb.textContent = `${dayFmt(r.date)} ${r.session}`; c0.append(nm, sb); tr.append(c0);
+    const n = k => r[k] === '' ? '—' : fmt(Number(r[k]));
+    [r.length, n('peak_live'), n('views'), n('viewers'), n('reach'), n('three_sec_views'), d3.format(',.0f')(Number(r.watch_hours)), r.avg_play, n('reactions'), n('comments'), n('shares'), n('interactions')]
+      .forEach(v => { const td = document.createElement('td'); td.textContent = v; tr.append(td); });
+    tb.append(tr);
+  });
+  document.querySelectorAll('#fbtbl th').forEach(th => { const k = th.querySelector('button').dataset.k; th.setAttribute('aria-sort', k === fbKey ? (fbDir > 0 ? 'ascending' : 'descending') : 'none'); });
+}
+document.querySelectorAll('#fbtbl th button').forEach(b => b.addEventListener('click', () => {
+  const k = b.dataset.k; if (fbKey === k) fbDir = -fbDir; else { fbKey = k; fbDir = k === 'date' ? 1 : -1; } drawFB();
+}));
+dash.onData(drawFB);
+</script>
+
+<p class="foot">Source: YouTube Studio, Meta Business Suite and Facebook Live Producer. Data last updated <span id="updated">October 12, 2026</span>. Facebook peak live viewers are approximate.</p>
+</div></body></html>
