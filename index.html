@@ -85,8 +85,21 @@ html,body{margin:0;background:var(--color-bg);color:var(--color-fg);font-family:
 <div class="bf">
   <header id="top">
     <h1>Balloon Fiesta Live! 2026 — YouTube &amp; Facebook</h1>
-    <p class="lede" id="takeaway" data-source="totals">—</p>
+    <p class="lede" id="takeaway" data-source="totals combined">—</p>
   </header>
+
+  <section id="combined">
+    <h1 class="sect">YouTube + Facebook</h1>
+    <p class="note">Totals across both platforms. Live audience compares the 14 sessions streamed on both: the Friday bonus show and the recorded Awards Ceremony were on YouTube only. Facebook counts a view as soon as a video starts playing, so watch time is the better measure of attention.</p>
+    <div class="tiles">
+      <div class="card"><div class="lbl">Total views</div><div class="big dash-skeleton" data-source="combined" data-field="views" data-row="0">—</div></div>
+      <div class="card"><div class="lbl">Total watch time (hours)</div><div class="big dash-skeleton" data-source="combined" data-field="watch_hours" data-row="0">—</div></div>
+      <div class="card"><div class="lbl">Avg peak live viewers / show (both platforms)</div><div class="big dash-skeleton" data-source="combined" data-field="avg_peak" data-row="0">—</div></div>
+      <div class="card"><div class="lbl">Top peak live (both platforms)</div><div class="big dash-skeleton" data-source="combined" data-field="max_peak" data-row="0">—</div></div>
+      <div class="card"><div class="lbl">Likes &amp; reactions</div><div class="big dash-skeleton" data-source="combined" data-field="likes" data-row="0">—</div></div>
+      <div class="card"><div class="lbl">Comments &amp; live chat</div><div class="big dash-skeleton" data-source="combined" data-field="conversation" data-row="0">—</div></div>
+    </div>
+  </section>
 
   <h1 class="sect">YouTube</h1>
   <section class="tiles" id="kpis">
@@ -199,6 +212,24 @@ html,body{margin:0;background:var(--color-bg);color:var(--color-fg);font-family:
   </section>
 </div>
 <script>
+dash.calc('combined', {
+  inputs: ['stats', 'fb'],
+  title: 'YouTube + Facebook totals',
+  description: 'Views, watch time and engagement summed across both platforms; live audience adds each show\'s YouTube and Facebook peaks for the 14 shows streamed on both.',
+  fn: (stats, fb) => {
+    const n = (rows, k) => rows.reduce((s, r) => s + (r[k] === '' || r[k] == null ? 0 : Number(r[k])), 0);
+    const ytPeak = new Map(stats.map(r => [r.id, Number(r.peak_live || 0)]));
+    const both = fb.map(r => Number(r.peak_live) + (ytPeak.get(r.id) || 0));
+    return [{
+      views: n(stats, 'views') + n(fb, 'views'),
+      watch_hours: Math.round(n(stats, 'watch_hours') + n(fb, 'watch_hours')),
+      avg_peak: Math.round(both.reduce((a, b) => a + b, 0) / both.length),
+      max_peak: Math.max(...both),
+      likes: n(stats, 'likes') + n(fb, 'reactions'),
+      conversation: n(stats, 'chat_messages') + n(stats, 'comments') + n(fb, 'comments')
+    }];
+  }
+});
 dash.calc('totals', {
   inputs: ['stats'],
   title: 'Live-show totals',
@@ -230,20 +261,21 @@ let sortKey = 'date', sortDir = 1;
 function fail(el) { el.innerHTML = ''; const d = document.createElement('div'); d.className = 'fail'; d.innerHTML = '<i></i>'; d.append('Failed to load'); el.append(d); }
 
 function draw() {
-  const S = dash.data('stats'), T = dash.data('totals');
+  const S = dash.data('stats'), T = dash.data('totals'), C = dash.data('combined');
   // tiles
-  document.querySelectorAll('.big[data-source=totals]').forEach(el => {
-    if (T.status === 'ok' && T.data.length) {
+  document.querySelectorAll('.big[data-source=totals], .big[data-source=combined]').forEach(el => {
+    const D = el.dataset.source === 'combined' ? C : T;
+    if (D.status === 'ok' && D.data.length) {
       el.classList.remove('dash-skeleton');
-      const v = T.data[0][el.dataset.field];
+      const v = D.data[0][el.dataset.field];
       const f = el.dataset.field;
-      el.textContent = f === 'hours_streamed' ? d3.format('.1f')(v) : f === 'ctr' ? d3.format('.1%')(v) : (v >= 10000 ? fmtC.format(v) : fmt(v));
-    } else { el.textContent = '—'; if (T.status === 'error') el.classList.remove('dash-skeleton'); }
+      el.textContent = f === 'hours_streamed' ? d3.format('.1f')(v) : f === 'ctr' ? d3.format('.1%')(v) : (v >= 1e6 ? d3.format('.3s')(v).replace('G','B') : v >= 10000 ? fmtC.format(v) : fmt(v));
+    } else { el.textContent = '—'; if (D.status === 'error') el.classList.remove('dash-skeleton'); }
   });
   const tk = document.getElementById('takeaway');
-  if (T.status === 'ok' && T.data.length) {
-    const t = T.data[0];
-    tk.textContent = `${t.shows} live shows plus the recorded Awards Ceremony drew ${fmt(t.views)} views and ${fmt(t.watch_hours)} hours of watch time on the live streams alone.`;
+  if (T.status === 'ok' && T.data.length && C.status === 'ok' && C.data.length) {
+    const t = T.data[0], c = C.data[0];
+    tk.textContent = `${t.shows} live shows and the recorded Awards Ceremony reached ${fmt(c.views)} views and ${fmt(c.watch_hours)} hours of watch time across YouTube and Facebook, with up to ${fmt(c.max_peak)} people watching live at once.`;
   } else tk.textContent = '—';
 
   const chart = document.getElementById('chart');
