@@ -29,5 +29,5 @@ The page has an End of Fiesta / +1 week / +1 month / To date switch so years can
 
 - End of Fiesta = through the day after the last show; +1 week and +1 month count from there.
 - 2025: `youtube-2025-end.csv` (through Oct 13, 2025), `-week.csv` (Oct 19), `-month.csv` (Nov 12), rebuilt from YouTube Studio's daily figures. `youtube-2025.csv` is To date.
-- 2026: `youtube-2026-end.csv` / `facebook-2026-end.csv` (through Oct 12, 2026). Add `youtube-2026-week.csv` after Oct 18 and `youtube-2026-month.csv` after Nov 11, then set their `stats` paths in the `YEARS` map at the top of `index.html`. `youtube-2026.csv` / `facebook-2026.csv` are To date.
+- 2026: `youtube-2026-week.csv` (through Oct 18) added Oct 20. `youtube-2026-end.csv` / `facebook-2026-end.csv` (through Oct 12, 2026). Add `youtube-2026-week.csv` after Oct 18 and `youtube-2026-month.csv` after Nov 11, then set their `stats` paths in the `YEARS` map at the top of `index.html`. `youtube-2026.csv` / `facebook-2026.csv` are To date.
 - Unique viewers and external % are lifetime-only, so they're blank in the milestone files.
