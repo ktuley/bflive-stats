@@ -47,18 +47,29 @@ td.n,th.n{text-align:right;white-space:nowrap}
 @media (max-width:640px){.two{grid-template-columns:1fr}.masthead{flex-direction:column;align-items:flex-start}}
 .note{font-size:12px;color:var(--muted);margin-top:8px}
 ol li,ul li{margin:6px 0}
+.yr-switch{display:inline-flex;border:1px solid var(--line);border-radius:999px;overflow:hidden;margin-bottom:8px}
+.yr-btn{all:unset;cursor:pointer;padding:4px 14px;font-size:14px;color:var(--muted);font-family:var(--sans)}
+.yr-btn[aria-pressed=true]{background:var(--fg);color:var(--bg)}
+.yr-btn:focus-visible{outline:2px solid #3b6ea8;outline-offset:-2px}
+.callout{border-left:3px solid var(--hi);padding:10px 14px;background:var(--panel);border-radius:0 var(--radius) var(--radius) 0;margin-top:16px}
 .foot{color:var(--muted);font-size:12px;margin-top:36px}
 </style>
 </head><body><div class="wrap">
 <div class="nav"><a href="./">← Viewing stats</a></div>
 <header class="masthead">
-  <img src="assets/logo-2026.png" alt="Balloon Fiesta Live! 2026 — Celebrating 10 years" width="150" height="142">
+  <img id="logo" src="assets/logo-2026.png" alt="Balloon Fiesta Live! 2026 — Celebrating 10 years" width="150" height="142">
   <div>
+    <div class="yr-switch" role="group" aria-label="Year">
+      <button class="yr-btn" data-year="2026" aria-pressed="true">2026</button>
+      <button class="yr-btn" data-year="2025" aria-pressed="false">2025</button>
+    </div>
     <h1>What Viewers Said</h1>
-    <p class="lede">Live chat and comments on the 2026 YouTube and Facebook live shows, Oct 2–11, 2026</p>
+    <p class="lede" id="sub2026">Live chat and comments on the 2026 YouTube and Facebook live shows, Oct 2–11, 2026</p>
+    <p class="lede" id="sub2025" hidden>Live chat and comments on the 2025 YouTube live shows, Oct 4–12, 2025</p>
   </div>
 </header>
 
+<div id="y2026">
 <div class="tiles">
   <div class="card"><div class="lbl">Comments &amp; chat messages</div><div class="big">20,350</div></div>
   <div class="card"><div class="lbl">Accounts that posted</div><div class="big">≈3,270</div></div>
@@ -161,6 +172,80 @@ ol li,ul li{margin:6px 0}
 
 <p class="foot">Comments captured October 13–14, 2026 · <a href="./">Back to viewing stats</a></p>
 </div>
+
+<div id="y2025" hidden>
+<div class="callout"><strong>YouTube only.</strong> Facebook deletes live videos about 30 days after they air, so the 2025 Facebook comments are gone. The Sunday Oct 12 Farewell Mass Ascension stream had a technical error and its chat replay isn’t available, so its live chat (651 messages) couldn’t be captured either.</div>
+
+<div class="tiles">
+  <div class="card"><div class="lbl">Chat messages &amp; comments</div><div class="big">12,238</div></div>
+  <div class="card"><div class="lbl">Accounts that posted</div><div class="big">1,069</div></div>
+  <div class="card"><div class="lbl">States named</div><div class="big">43</div></div>
+  <div class="card"><div class="lbl">Other countries named</div><div class="big">19</div></div>
+</div>
+
+<h2>Summary</h2>
+<p>Viewers left 12,178 live chat messages on 13 of the 2025 YouTube live streams and 60 comments under the videos, from 1,069 accounts. As in 2026, about seven in ten of the posters who named a location were outside New Mexico.</p>
+<ul class="keys">
+  <li><strong>The same mix of past and future visitors.</strong> About 90 posters say they have been to Fiesta, about 55 want to come, about 60 say they plan to, and about 75 were on the field or crewing.</li>
+  <li><strong>Art and Ted were the faces of the show.</strong> Art is mentioned about 150 times and Ted about 120, mostly in greetings and thank-yous.</li>
+  <li><strong>Status questions led here too.</strong> About 860 messages (7%) are questions, and about 700 mention wind, flags, launches or the glow.</li>
+  <li><strong>Complaints were rare.</strong> About 40 messages mention audio or stream glitches, mostly brief notes that the mic was cutting in and out.</li>
+</ul>
+
+<h2>2025 and 2026 on YouTube</h2>
+<p>Comparing YouTube alone, 2026 drew about 30% more posters. The 2025 regulars were a little chattier.</p>
+<div class="card scroll">
+<table>
+  <thead><tr><th></th><th class="n">2025</th><th class="n">2026</th></tr></thead>
+  <tbody>
+    <tr><td>Live streams with chat captured</td><td class="n">13</td><td class="n">15</td></tr>
+    <tr><td>Chat messages &amp; comments</td><td class="n">12,238</td><td class="n">13,536</td></tr>
+    <tr><td>Unique posters</td><td class="n">1,069</td><td class="n">1,380</td></tr>
+    <tr><td>Messages per poster</td><td class="n">11.4</td><td class="n">9.8</td></tr>
+    <tr><td>Posted only once</td><td class="n">473 (44%)</td><td class="n">623 (45%)</td></tr>
+    <tr><td>Posters who named a place</td><td class="n">414</td><td class="n">556</td></tr>
+    <tr><td>… of them outside New Mexico</td><td class="n">71%</td><td class="n">70%</td></tr>
+    <tr><td>Questions (share of messages)</td><td class="n">7.1%</td><td class="n">7.3%</td></tr>
+    <tr><td>Posters who say they’ve been to Fiesta</td><td class="n">≈90</td><td class="n">≈115</td></tr>
+    <tr><td>Posters who want to come / plan to come</td><td class="n">≈55 / ≈60</td><td class="n">≈65 / ≈75</td></tr>
+  </tbody>
+</table>
+</div>
+<p class="note">2025 is missing the Sunday Farewell chat, so its totals run a few percent low. The 2026 column here is YouTube only and leaves out Facebook.</p>
+
+<div class="card">
+  <h3>Sunday morning’s Mass Ascension drew the most chat</h3>
+  <div class="bars" id="shows25"></div>
+  <p class="note">Live chat plus video comments, in date order. Thursday’s Glowdeo ran only 29 minutes. Sunday Oct 12 shows only its two video comments because its chat replay isn’t available. The Awards Ceremony was a recorded upload.</p>
+</div>
+
+<h2>Where viewers watched from</h2>
+<p>About 410 posters said where they were. New Mexico led, followed by Texas, Florida and Colorado. The United Kingdom was again the top country outside the US.</p>
+<div class="two">
+  <div class="card"><h3>Top 15 states (posters)</h3><div class="bars" id="states25"></div></div>
+  <div class="card"><h3>Countries outside the US (posters)</h3><div class="bars" id="countries25"></div></div>
+</div>
+<p class="note">Counts only posters who named a state, city or country, so these are minimums.</p>
+
+<h2>What viewers talked about</h2>
+<ol>
+  <li><strong>The hosts and the coverage.</strong> “Thanks Art and Ted for a great week of fiesta broadcasts!”, “Great coverage guys!”. Pilots and crews from other events checked in too, from a balloon festival in the Adirondacks to a balloon from Augsburg, Germany.</li>
+  <li><strong>Special shapes by name.</strong> Darth Vader and Yoda (about 45 mentions), Airabelle the cow (about 40), Zozobra, Steggy, Smokey, Boo, Humpty Dumpty and Montie the black sheep, who was “reunited with Steggy on the field.”</li>
+  <li><strong>Dawn Patrol, drones and fireworks.</strong> About 55 messages mention Dawn Patrol and about 75 the drone show. Viewers asked where to watch it and whether the wind would allow it.</li>
+  <li><strong>Merchandise and giveaways.</strong> The jacket, the license plate giveaway and the mystery pin boxes, which “already sold out!”</li>
+  <li><strong>Glows and emoji.</strong> About 1,360 messages are emoji only, mostly fire and balloon emoji during the burns.</li>
+  <li><strong>Plans for next year.</strong> “I will definitely be there next year!!”, “we will be there next year for the first time in 30 years”, “I want to volunteer next year!”</li>
+</ol>
+
+<h2>Method and caveats</h2>
+<ul class="keys">
+  <li><strong>Source.</strong> Captured Oct 21, 2026: the full YouTube live chat replay (“Live chat replay”, all messages) for 13 live streams, plus the comments under all 2025 show videos. The captured chat matches YouTube Studio’s counts within a few percent, except Sunday Oct 5 AM (about 83%).</li>
+  <li><strong>Same rules as 2026.</strong> Themes and locations use the same keyword matching as 2026, so the two years compare directly. They are close estimates, not exact tallies. Quotes are shown without names.</li>
+</ul>
+<p class="foot">Comments captured October 21, 2026 · <a href="./">Back to viewing stats</a></p>
+</div>
+
+</div>
 <script>
 (function(){
   const fmt = n => n.toLocaleString('en-US');
@@ -190,11 +275,34 @@ ol li,ul li{margin:6px 0}
     const box = document.getElementById(id); const mx = Math.max(...data.map(d => d[1]));
     data.forEach(([n, v], i) => {
       const track = el('div', 'tr'); const s = el('div', 'seg one' + (hiFirst && i === 0 ? ' hi' : ''));
-      s.style.width = Math.max(1, v / mx * 80) + '%'; track.append(s, el('span', 'v', fmt(v))); track.title = `${n}: ${v} posters`;
+      s.style.width = Math.max(1, v / mx * 80) + '%'; track.append(s, el('span', 'v', fmt(v))); track.title = `${n}: ${fmt(v)}${id === 'shows25' ? ' messages' : ' posters'}`;
       box.append(el('div', 'nm', n), track);
     });
   }
   simple('states', states, true); simple('countries', countries, false);
+  const shows25 = [['Sat Oct 4 AM · Opening Day',1384],['Sat Oct 4 PM · Twilight Twinkle Glow',907],['Sun Oct 5 AM · Mass Ascension',1800],
+    ['Sun Oct 5 PM · The Original Balloon Glow',723],['Mon Oct 6 AM · First Day of Competition',820],['Tue Oct 7 AM · Competition Day',904],
+    ['Wed Oct 8 AM · Mass Ascension & Flight of Nations',864],['Thu Oct 9 AM · Special Shapes Rodeo',1354],['Thu Oct 9 PM · Special Shapes Glowdeo',179],
+    ["Fri Oct 10 AM · Special Shape Rodeo (Kids' Day)",1165],['Fri Oct 10 PM · Special Shapes Glowdeo',684],['Sat Oct 11 AM · Mass Ascension',572],
+    ['Sat Oct 11 PM · Night Magic Balloon Glow',874],['Sat Oct 11 · Awards Ceremony (recorded)',6],['Sun Oct 12 AM · Farewell Mass Ascension',2]];
+  const states25 = [['New Mexico',119],['Texas',38],['Florida',24],['Colorado',20],['Pennsylvania',13],['Michigan',12],['Missouri',12],['Kansas',11],['Ohio',11],
+    ['Oklahoma',9],['Indiana',9],['California',9],['Wisconsin',8],['North Carolina',8],['Arizona',8]];
+  const countries25 = [['United Kingdom',35],['Canada',14],['Netherlands',10],['Belgium',6],['Germany',4],['Brazil',4],['China',3],['India',2],['Mexico',2],
+    ['Japan',2],['France',2],['Chile',1],['Guatemala',1],['Ireland',1],['Philippines',1],['South Korea',1],['Spain',1],['Taiwan',1],['Turkey',1]];
+  const peak25 = Math.max(...shows25.map(x => x[1]));
+  simple('shows25', shows25, false); simple('states25', states25, true); simple('countries25', countries25, false);
+  const y26 = document.getElementById('y2026'), y25 = document.getElementById('y2025'), logo = document.getElementById('logo');
+  function setYear(y) {
+    y26.hidden = y !== '2026'; y25.hidden = y !== '2025';
+    document.getElementById('sub2026').hidden = y !== '2026'; document.getElementById('sub2025').hidden = y !== '2025';
+    logo.src = y === '2025' ? 'assets/logo-2025.png' : 'assets/logo-2026.png';
+    logo.alt = y === '2025' ? 'Balloon Fiesta Live! 2025' : 'Balloon Fiesta Live! 2026 — Celebrating 10 years';
+    document.querySelectorAll('.yr-btn').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.year === y)));
+    document.title = `Balloon Fiesta Live! ${y} — What Viewers Said`;
+    try { history.replaceState(null, '', y === '2025' ? '#2025' : location.pathname); } catch (e) {}
+  }
+  document.querySelectorAll('.yr-btn').forEach(b => b.addEventListener('click', () => setYear(b.dataset.year)));
+  setYear(location.hash === '#2025' ? '2025' : '2026');
 })();
 </script>
 </body></html>
