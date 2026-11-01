@@ -265,7 +265,7 @@ html:not([data-year="2025"]) .y2025{display:none!important}
 
   <section id="facebook">
     <h1 class="sect">Facebook</h1>
-    <p class="note y2026">14 live shows on the Balloon Fiesta Page (the Friday bonus show was pulled and the Awards Ceremony wasn't uploaded). From Meta Business Suite: End of Fiesta is the Oct 12, 2026 pull; To date (also used for +1 week) is through Oct 29, 2026. Facebook counts a "view" whenever the video starts playing, even for a moment in the feed, so its views run much higher than YouTube's; watch time is the fairer comparison.</p>
+    <p class="note y2026">14 live shows on the Balloon Fiesta Page (the Friday bonus show was pulled and the Awards Ceremony wasn't uploaded). From Meta Business Suite: End of Fiesta is the Oct 12, 2026 pull; To date (also used for +1 week) is through Nov 1, 2026. Facebook counts a "view" whenever the video starts playing, even for a moment in the feed, so its views run much higher than YouTube's; watch time is the fairer comparison.</p>
     <p class="note y2025">14 live shows on the Balloon Fiesta Page, from snapshots taken before Facebook deleted the videos (30 days after airing). The Awards Ceremony wasn't posted to Facebook. Views and reach are the final recorded figures; 3-second views are from the live broadcasts. Watch time, live peaks and engagement weren't captured.</p>
     <div class="tiles">
       <div class="card"><div class="lbl">Avg peak live viewers / show (approx.)</div><div class="big dash-skeleton" data-source="fbtotals" data-field="avg_peak" data-row="0">—</div></div>
@@ -371,7 +371,7 @@ window.BF_applyYear = (y) => {
   logo.src = BF_YEARS[y].logo;
   logo.alt = y === '2025' ? 'Balloon Fiesta Live! 2025' : 'Balloon Fiesta Live! 2026 — Celebrating 10 years';
   const sn = BF_YEARS[y].snaps[BF_VIEW];
-  const fbTxt = y === '2025' ? 'Facebook figures are the final records kept before deletion and don\'t change with this switch.' : (BF_VIEW === 'end' ? 'Facebook figures are from Meta Business Suite, through Oct 12, 2026.' : 'Facebook figures are from Meta Business Suite, through Oct 29, 2026 (Facebook only shows lifetime totals, so +1 week uses the latest pull).');
+  const fbTxt = y === '2025' ? 'Facebook figures are the final records kept before deletion and don\'t change with this switch.' : (BF_VIEW === 'end' ? 'Facebook figures are from Meta Business Suite, through Oct 12, 2026.' : 'Facebook figures are from Meta Business Suite, through Nov 1, 2026 (Facebook only shows lifetime totals, so +1 week uses the latest pull).');
   document.getElementById('snap-note').textContent = `Showing ${BF_SNAP_NAMES[BF_VIEW]}: YouTube views, watch time, likes and impressions ${sn.label}${sn.prelim ? ' (preliminary until YouTube finishes processing that day)' : ''}. Live audience and chat are from the broadcasts and don't change. ${fbTxt}`;
 };
 const yoyRow = (rows) => {
