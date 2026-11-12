@@ -381,13 +381,14 @@ const yoyRow = (rows) => {
 function drawExec() {
   const el = document.getElementById('exec');
   const A = BF_ALL.data['2025'] || {}, B = BF_ALL.data['2026'] || {};
-  const k = (A[BF_VIEW] && B[BF_VIEW] && BF_VIEW !== 'now') ? BF_VIEW : 'end';
+  // Always the most current like-for-like milestone both years have (To date isn't like-for-like: 2025 includes a year of replays).
+  const k = ['month', 'week', 'end'].find(s => A[s] && B[s]) || 'end';
   if (BF_ALL.status !== 'ok' || !A[k] || !B[k]) { el.textContent = ''; return; }
   const a = yoyRow(A[k]), b = yoyRow(B[k]);
   const pk = rows => { const l = rows.filter(q => q.type === 'Live' && q.id !== '10-02-am'); return d3.mean(l, q => Number(q.peak_live)); };
   const pa = pk(A[k]), pb = pk(B[k]);
   const pct = (x, y) => { const v = y / x - 1; return `${v >= 0 ? 'up' : 'down'} ${d3.format('.0%')(Math.abs(v))}`; };
-  el.textContent = `Compared with 2025 at the same point (${BF_SNAP_NAMES[k]}, same 14 live shows plus the Awards): YouTube views are ${pct(a.views, b.views)} to ${fmt(b.views)}, watch time is ${pct(a.wh, b.wh)} to ${fmt(Math.round(b.wh))} hours, and the average peak live audience is ${pct(pa, pb)} to ${fmt(Math.round(pb))} per show${BF_YEARS['2026'].snaps[k].prelim ? ' (preliminary)' : ''}.`;
+  el.textContent = `Compared with 2025 at the same point (${BF_SNAP_NAMES[k]}, ${BF_YEARS['2026'].snaps[k].label}; same 14 live shows plus the Awards): YouTube views are ${pct(a.views, b.views)} to ${fmt(b.views)}, watch time is ${pct(a.wh, b.wh)} to ${fmt(Math.round(b.wh))} hours, and the average peak live audience is ${pct(pa, pb)} to ${fmt(Math.round(pb))} per show${BF_YEARS['2026'].snaps[k].prelim ? ' (preliminary)' : ''}.`;
 }
 dash.onData(drawExec);
 function drawYoY() {
